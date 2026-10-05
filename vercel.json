@@ -18,6 +18,7 @@
     "env": {
         "APP_DEBUG": "false",
         "LOG_CHANNEL": "stderr",
+        "LOG_STDERR_FORMATTER": "Monolog\\Formatter\\LineFormatter",
         "VIEW_COMPILED_PATH": "/tmp/views",
         "APP_CONFIG_CACHE": "/tmp/config.php",
         "APP_EVENTS_CACHE": "/tmp/events.php",
