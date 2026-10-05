@@ -3,6 +3,19 @@
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
+// Neon identifica la base de datos por SNI, que libpq solo soporta desde la versión 14
+// (el runtime de Vercel trae una anterior). Sin SNI, Neon acepta el endpoint en la
+// contraseña: "endpoint=<id>$<contraseña>". Con SNI ese formato falla, así que solo se usa sin él.
+$pgsqlUrl = env('DB_URL', env('DATABASE_URL'));
+$neon = $pgsqlUrl ? parse_url($pgsqlUrl) : false;
+
+if (! $neon
+    || ! str_ends_with($neon['host'] ?? '', '.neon.tech')
+    || ! defined('PGSQL_LIBPQ_VERSION')
+    || version_compare(PGSQL_LIBPQ_VERSION, '14', '>=')) {
+    $neon = null;
+}
+
 return [
 
     /*
@@ -86,17 +99,19 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'url' => env('DB_URL', env('DATABASE_URL')),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
-            'password' => env('DB_PASSWORD', ''),
+            'url' => $neon ? null : $pgsqlUrl,
+            'host' => $neon['host'] ?? env('DB_HOST', '127.0.0.1'),
+            'port' => $neon['port'] ?? env('DB_PORT', '5432'),
+            'database' => $neon ? ltrim($neon['path'], '/') : env('DB_DATABASE', 'laravel'),
+            'username' => $neon ? urldecode($neon['user']) : env('DB_USERNAME', 'root'),
+            'password' => $neon
+                ? 'endpoint='.Str::before(Str::before($neon['host'], '.'), '-pooler').'$'.urldecode($neon['pass'])
+                : env('DB_PASSWORD', ''),
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => 'public',
-            'sslmode' => env('DB_SSLMODE', 'prefer'),
+            'sslmode' => $neon ? 'require' : env('DB_SSLMODE', 'prefer'),
             // El pooler de Neon (PgBouncer) aborta las transacciones con sentencias preparadas nativas.
             'options' => extension_loaded('pdo_pgsql') ? [
                 PDO::ATTR_EMULATE_PREPARES => true,
