@@ -141,7 +141,7 @@
 
         /* ──────── CONTENEDOR ──────── */
         .container { max-width: 1100px; margin: 0 auto; padding: 0 1.25rem; }
-        .section { padding: 3rem 0; }
+        .section { padding-top: 3rem; padding-bottom: 3rem; }
 
         /* ──────── BOTONES ──────── */
         .btn-primary-yf {
@@ -195,6 +195,29 @@
         footer a { color: var(--terciario); text-decoration: none; }
         footer a:hover { color: var(--secondary); }
         .footer-links { display: flex; justify-content: center; gap: 1.2rem; flex-wrap: wrap; margin-bottom: .75rem; }
+
+        /* ──────── TARJETAS DE TEXTO (páginas informativas) ──────── */
+        .card-pad { padding: 2.5rem; }
+        .card-pad h2 { color: var(--primary-dark); margin-bottom: 1rem; }
+        .card-pad h3 { color: var(--primary); margin: 1.5rem 0 .5rem; }
+        .card-pad p, .card-pad li { color: #555; line-height: 1.8; }
+        .card-pad p + p { margin-top: 1rem; }
+        .card-pad ul { margin: .5rem 0 0 1.25rem; }
+
+        /* ──────── RESPONSIVE ──────── */
+        @media (max-width: 768px) {
+            .navbar { padding: .6rem 1rem; }
+            .navbar-brand { font-size: 1.8rem; }
+            .mobile-menu { padding: .5rem 1rem 1rem; }
+            .page-banner { padding: 2.25rem 1rem 2rem; }
+            .page-banner h1 { font-size: 2.2rem; }
+            .page-banner p { font-size: .95rem; }
+            .container { padding: 0 1rem; }
+            .section { padding-top: 2rem; padding-bottom: 2rem; }
+            .card-pad { padding: 1.5rem 1.25rem; }
+            footer { padding: 1.5rem 1rem; }
+            .footer-links { gap: .5rem 1rem; }
+        }
     </style>
     @stack('styles')
 </head>

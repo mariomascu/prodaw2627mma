@@ -2,8 +2,8 @@
 @section('title', 'Solicitud enviada — YoguiFit')
 
 @section('content')
-<div style="max-width:560px;margin:5rem auto;text-align:center;padding:0 1.25rem">
-    <div style="background:#fff;border-radius:16px;padding:3rem 2rem;box-shadow:0 4px 20px rgba(52,130,137,.12)">
+<div style="max-width:560px;margin:3rem auto;text-align:center;padding:0 1.25rem">
+    <div style="background:#fff;border-radius:16px;padding:3rem 1.5rem;box-shadow:0 4px 20px rgba(52,130,137,.12)">
         <div style="width:80px;height:80px;border-radius:50%;background:var(--selected-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem">
             <i class="bi bi-check-circle-fill" style="font-size:3rem;color:var(--primary)"></i>
         </div>

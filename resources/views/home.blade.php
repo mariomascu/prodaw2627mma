@@ -15,7 +15,7 @@
         position: absolute; inset: 0;
         background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M40 40c0-11.046-8.954-20-20-20S0 28.954 0 40s8.954 20 20 20 20-8.954 20-20zm20 0c0 11.046 8.954 20 20 20s20-8.954 20-20-8.954-20-20-20-20 8.954-20 20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     }
-    .hero-content { position: relative; max-width: 700px; }
+    .hero-content { position: relative; max-width: 820px; width: 100%; }
     .hero-logo {
         font-family: 'Montez', cursive;
         font-size: 5rem;
@@ -39,9 +39,9 @@
     }
     .hero-actions {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
         gap: 1rem;
-        max-width: 600px;
+        max-width: 820px;
         margin: 0 auto;
     }
     .action-card {
@@ -61,7 +61,7 @@
         color: #fff;
     }
     .action-card i { font-size: 2.2rem; color: var(--salmon); }
-    .action-card span { font-size: .95rem; font-weight: 500; text-transform: uppercase; letter-spacing: .05em; }
+    .action-card span { font-size: .95rem; font-weight: 500; text-transform: uppercase; letter-spacing: .05em; text-align: center; }
 
     /* Sección características */
     .features { background: #fff; padding: 4rem 0; }
@@ -97,6 +97,22 @@
         margin-bottom: 1rem;
     }
     .cta-section p { font-size: 1rem; opacity: .88; margin-bottom: 2rem; }
+    .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    @media (max-width: 768px) {
+        .hero { min-height: auto; padding: 3rem 1rem; }
+        .hero-logo { font-size: 3.6rem; }
+        .hero-slogan { font-size: 1rem; margin-bottom: 1.75rem; }
+        .hero-actions { grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+        .action-card { padding: 1.25rem .5rem; }
+        .action-card i { font-size: 1.9rem; }
+        .action-card span { font-size: .8rem; }
+        .features { padding: 2.5rem 0; }
+        .features-grid { gap: 1rem; }
+        .feature-item { padding: 1rem .5rem; }
+        .cta-section { padding: 3rem 1rem; }
+        .cta-section h2 { font-size: 2.1rem; }
+    }
 </style>
 @endpush
 
@@ -166,13 +182,14 @@
     <div class="container">
         <h2>¿Listo para empezar?</h2>
         <p>Reserva tu primera sesión y descubre cómo podemos ayudarte.</p>
-        <a href="{{ route('cuestionario') }}" class="btn-salmon">
-            <i class="bi bi-calendar-plus"></i> Reservar ahora
-        </a>
-        &nbsp;
-        <a href="{{ route('servicios') }}" class="btn-outline-yf" style="border-color:#fff;color:#fff">
-            <i class="bi bi-eye"></i> Ver servicios
-        </a>
+        <div class="cta-actions">
+            <a href="{{ route('cuestionario') }}" class="btn-salmon">
+                <i class="bi bi-calendar-plus"></i> Reservar ahora
+            </a>
+            <a href="{{ route('servicios') }}" class="btn-outline-yf" style="border-color:#fff;color:#fff">
+                <i class="bi bi-eye"></i> Ver servicios
+            </a>
+        </div>
     </div>
 </section>
 

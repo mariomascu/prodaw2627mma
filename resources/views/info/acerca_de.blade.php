@@ -3,26 +3,43 @@
 @section('content')
 <div class="page-banner">
     <h1><i class="bi bi-info-circle"></i> Acerca de YoguiFit</h1>
-    <p>Conoce nuestra historia y filosofía</p>
+    <p>Especialista en Terapia Deportiva y Masaje Thai Fusión</p>
 </div>
 <div class="container section" style="max-width:760px">
-    <div class="card-yf" style="padding:2.5rem">
-        <h2 style="font-family:'Montez',cursive;font-size:2rem;color:var(--primary);margin-bottom:1rem">
-            Especialistas en bienestar y terapia
+    <div class="card-yf card-pad">
+        <h2 style="font-family:'Montez',cursive;font-size:2rem;color:var(--primary);font-weight:400">
+            Quién soy
         </h2>
-        <p style="color:#555;line-height:1.8;margin-bottom:1.2rem">
-            YoguiFit nace con la vocación de ofrecer un espacio de bienestar integral donde el cuerpo y la mente
-            encuentren el equilibrio que necesitan. Somos especialistas en terapia deportiva y masaje Thai Fusión,
-            combinando las mejores técnicas orientales y occidentales para ofrecerte una experiencia única.
+        <p>
+            Me llamo Vanessa, soy brasileña y llevo viviendo en España 18 años, y desde siempre he estado
+            plenamente conectada al deporte y al masaje Thai.
         </p>
-        <p style="color:#555;line-height:1.8;margin-bottom:1.2rem">
-            Nuestro equipo está formado por terapeutas certificados con años de experiencia, comprometidos con
-            tu bienestar y con un trato completamente personalizado. Ya seas deportista de élite, alguien que
-            busca relajación o una persona con necesidades terapéuticas específicas, tenemos el tratamiento ideal para ti.
+        <p>
+            Graduada en Enfermería aquí en Málaga, donde vivo actualmente y gestiono mi propio negocio de masajes.
+            Mis conocimientos de anatomía unidos a algunos cursos de especialización y un grado en Acondicionamiento
+            físico y Deporte me han aportado herramientas para construir mi propio método, <strong>Masaje Thai Fusión</strong>.
         </p>
-        <p style="color:#555;line-height:1.8">
-            Además, ofrecemos formación profesional de alta calidad para quienes deseen adentrarse en el mundo
-            de la terapia manual y el yoga terapéutico.
+        <p>
+            He tenido la oportunidad de probar diferentes técnicas y conocer diversos métodos de masaje durante mis
+            viajes por Asia. En especial, soy muy agradecida de haber podido estudiar en Wat Pho, una reconocida
+            escuela de masaje en Tailandia.
+        </p>
+        <p>
+            Mi pasión por los retos me llevó a embarcarme en este bonito proyecto que ahora comparto con vosotros.
+        </p>
+
+        <h3>YoguiFit Studio de Masajes</h3>
+        <p>
+            En YoguiFit te ayudamos a mejorar tu salud física y mental. Los beneficios de un buen masaje son muchos:
+            no se trata solo de relajación, de liberar el estrés y de apaciguar el dolor; el masaje en todos sus tipos
+            también estimula el sistema inmunológico, haciendo nuestro organismo más sano y poderoso.
+        </p>
+        <p>
+            Además de los masajes en la Axarquía, organizamos el <strong>Campus para masajistas</strong>, un curso de
+            especialización en Terapia Deportiva y Masaje Thai Fusión en formato retiro.
+        </p>
+        <p style="font-style:italic;color:var(--primary)">
+            Ama tu cuerpo, porque es el lugar en el que vas a vivir toda tu vida.
         </p>
     </div>
 </div>

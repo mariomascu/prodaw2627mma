@@ -6,8 +6,8 @@
     <p>Estamos aquí para atenderte</p>
 </div>
 <div class="container section" style="max-width:700px">
-    <div class="card-yf" style="padding:2.5rem">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem">
+    <div class="card-yf card-pad">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:2rem">
             <div style="text-align:center">
                 <i class="bi bi-telephone-fill" style="font-size:2.5rem;color:var(--primary);display:block;margin-bottom:.75rem"></i>
                 <h3 style="color:var(--primary-dark);margin-bottom:.4rem">Teléfono</h3>

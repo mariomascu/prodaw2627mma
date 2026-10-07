@@ -3,7 +3,7 @@
 
 @push('styles')
 <style>
-    .tarifas-section { padding: 2.5rem 0 4rem; }
+    .tarifas-section { padding-top: 2.5rem; padding-bottom: 4rem; }
 
     .seccion-titulo {
         display: flex; align-items: center; gap: .75rem;
@@ -57,6 +57,16 @@
     .tarifa-body a {
         display: inline-flex; align-items: center; gap: .4rem;
         font-size: .85rem;
+    }
+
+    @media (max-width: 768px) {
+        .tarifas-section { padding-top: 1rem; padding-bottom: 2.5rem; }
+        .seccion-titulo { font-size: 1.7rem; margin: 1.75rem 0 1rem; }
+        .tarifa-header { flex-wrap: wrap; padding: .9rem 1rem; gap: .5rem; }
+        .tarifa-titulo-wrap { flex-basis: calc(100% - 2rem); order: 1; }
+        .tarifa-toggle { order: 2; }
+        .tarifa-chips { order: 3; }
+        .tarifa-body { padding: .9rem 1rem 1.1rem; }
     }
 </style>
 @endpush

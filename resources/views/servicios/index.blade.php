@@ -34,9 +34,9 @@
 
     .servicios-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
         gap: 1.5rem;
-        padding: 2.5rem 0;
+        padding-top: 2.5rem; padding-bottom: 2.5rem;
     }
 
     .servicio-card {
@@ -84,6 +84,13 @@
     .meta-chip.precio { background: var(--salmon); color: #fff; }
 
     .servicio-footer { border-top: 1px solid var(--selected-bg); padding-top: .75rem; }
+
+    @media (max-width: 768px) {
+        .tabs-nav { padding: 1rem; }
+        .tab-btn { padding: .5rem 1.1rem; font-size: .8rem; }
+        .servicios-grid { padding-top: 1.5rem; padding-bottom: 2rem; gap: 1rem; }
+        .servicio-img { height: 140px; }
+    }
 </style>
 @endpush
 

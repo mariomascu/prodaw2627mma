@@ -111,6 +111,15 @@
     }
     .servicio-seleccionado i { color: var(--salmon); }
     .servicio-seleccionado strong { font-weight: 600; }
+
+    @media (max-width: 768px) {
+        .cuestionario-wrap { padding: 2rem 1rem; }
+        .steps-bar { margin-bottom: 1.5rem; }
+        .panel { padding: 1.5rem 1.25rem; }
+        .gender-options { gap: .75rem; }
+        .gender-btn { padding: 1.25rem 1rem; min-width: 0; flex: 1; }
+        .gender-btn i { font-size: 2.4rem; }
+    }
 </style>
 @endpush
 

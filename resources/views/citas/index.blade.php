@@ -33,6 +33,12 @@
     .empty-state { text-align: center; padding: 4rem 1rem; color: #999; }
     .empty-state i { font-size: 4rem; display: block; margin-bottom: 1rem; color: var(--terciario); }
     .empty-state h3 { font-size: 1.2rem; margin-bottom: .5rem; color: #bbb; }
+
+    @media (max-width: 768px) {
+        .citas-wrap { padding: 2rem 1rem; }
+        .cita-card { padding: 1.1rem 1.1rem; gap: .9rem; }
+        .cita-info { min-width: 0; flex-basis: calc(100% - 60px); }
+    }
 </style>
 @endpush
 
