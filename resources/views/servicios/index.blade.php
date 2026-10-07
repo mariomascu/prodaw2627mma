@@ -49,14 +49,62 @@
     }
     .servicio-card:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(52,130,137,.2); }
 
+    /* Entrada escalonada de las tarjetas */
+    .servicio-card {
+        opacity: 0;
+        animation: cardIn .55s cubic-bezier(.2,.7,.3,1) forwards;
+        animation-delay: calc(var(--i, 0) * 90ms);
+    }
+    @keyframes cardIn {
+        from { opacity: 0; transform: translateY(18px); }
+        to   { opacity: 1; transform: none; }
+    }
+
     .servicio-img {
-        height: 180px;
+        height: 200px;
         background: linear-gradient(135deg, var(--primary), var(--secondary));
         display: flex; align-items: center; justify-content: center;
         position: relative; overflow: hidden;
     }
-    .servicio-img i { font-size: 5rem; color: rgba(255,255,255,.35); }
+    .servicio-img > i { font-size: 5rem; color: rgba(255,255,255,.35); }
+
+    /* Brillo mientras la imagen carga */
+    .servicio-img::before {
+        content: '';
+        position: absolute; inset: 0;
+        background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.22) 50%, transparent 80%);
+        transform: translateX(-100%);
+        animation: shimmer 1.4s ease-in-out infinite;
+        z-index: 1;
+    }
+    .servicio-img.is-loaded::before { display: none; }
+    @keyframes shimmer { to { transform: translateX(100%); } }
+
+    .servicio-img img {
+        position: absolute; inset: 0;
+        width: 100%; height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transform: scale(1.08);
+        filter: blur(6px);
+        transition: opacity .6s ease, transform .9s ease, filter .6s ease;
+        z-index: 2;
+    }
+    .servicio-img.is-loaded img { opacity: 1; transform: scale(1); filter: none; }
+    .servicio-card:hover .servicio-img.is-loaded img { transform: scale(1.06); }
+
+    /* Velo inferior para que la imagen se funda con la tarjeta */
+    .servicio-img::after {
+        content: '';
+        position: absolute; inset: 0;
+        background: linear-gradient(180deg, rgba(18,52,55,.05) 55%, rgba(18,52,55,.35) 100%);
+        z-index: 3;
+        pointer-events: none;
+    }
+
     .servicio-img .tipo-badge {
+        z-index: 4;
+        box-shadow: 0 2px 8px rgba(0,0,0,.18);
         position: absolute; top: .75rem; right: .75rem;
         background: var(--salmon); color: #fff;
         padding: .2rem .7rem; border-radius: 12px; font-size: .75rem; font-weight: 600;
@@ -89,7 +137,13 @@
         .tabs-nav { padding: 1rem; }
         .tab-btn { padding: .5rem 1.1rem; font-size: .8rem; }
         .servicios-grid { padding-top: 1.5rem; padding-bottom: 2rem; gap: 1rem; }
-        .servicio-img { height: 140px; }
+        .servicio-img { height: 180px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .servicio-card { animation: none; opacity: 1; }
+        .servicio-img::before { display: none; }
+        .servicio-img img { transition: opacity .3s; transform: none; filter: none; }
     }
 </style>
 @endpush
@@ -119,8 +173,14 @@
 <div class="container">
     <div class="servicios-grid">
         @forelse($servicios as $servicio)
-        <article class="servicio-card">
-            <div class="servicio-img">
+        <article class="servicio-card" style="--i: {{ $loop->index }}">
+            <div class="servicio-img {{ $servicio->imagen_url ? '' : 'is-loaded' }}">
+                @if($servicio->imagen_url)
+                    <img src="{{ $servicio->imagen_url }}" alt="{{ $servicio->titulo }}"
+                         loading="{{ $loop->index < 3 ? 'eager' : 'lazy' }}" decoding="async"
+                         onload="this.parentElement.classList.add('is-loaded')"
+                         onerror="this.parentElement.classList.add('is-loaded'); this.remove()">
+                @endif
                 @if($servicio->tipo === 'cursos')
                     <i class="bi bi-mortarboard-fill"></i>
                 @elseif($servicio->tipo === 'masajes')
@@ -159,3 +219,12 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+// Imágenes que ya estaban en caché antes de que se ejecutara el onload
+document.querySelectorAll('.servicio-img img').forEach(img => {
+    if (img.complete && img.naturalWidth) img.parentElement.classList.add('is-loaded');
+});
+</script>
+@endpush
