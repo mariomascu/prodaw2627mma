@@ -2,43 +2,53 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Cita;
-use App\Models\Servicio;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
+/**
+ * Cuestionario que el cliente responde una sola vez, al registrarse.
+ * Las respuestas se guardan en la tabla users para las estadísticas del panel de administración.
+ */
 class CuestionarioController extends Controller
 {
     public function index(Request $request)
     {
-        $servicioId = $request->get('servicio_id');
-        $servicio = $servicioId ? Servicio::find($servicioId) : null;
-        return view('cuestionario.index', compact('servicio'));
+        // Si ya lo respondió, no se vuelve a preguntar
+        if ($request->user()->perfilCompleto() || $request->user()->is_admin) {
+            return redirect()->intended(route('servicios'));
+        }
+
+        return view('cuestionario.index', [
+            'sexos'       => User::SEXOS,
+            'objetivos'   => User::OBJETIVOS,
+            'frecuencias' => User::FRECUENCIAS,
+        ]);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nombre'   => 'required|string|max:100',
-            'telefono' => 'required|string|max:20',
-            'sexo'     => 'nullable|in:masculino,femenino',
+        $user = $request->user();
+
+        if ($user->perfilCompleto()) {
+            return redirect()->intended(route('servicios'));
+        }
+
+        $datos = $request->validate([
+            'sexo'       => ['required', Rule::in(array_keys(User::SEXOS))],
+            'objetivo'   => ['required', Rule::in(array_keys(User::OBJETIVOS))],
+            'frecuencia' => ['required', Rule::in(array_keys(User::FRECUENCIAS))],
+            'telefono'   => ['required', 'string', 'max:20'],
+        ], [
+            'sexo.required'       => __('Selecciona tu sexo.'),
+            'objetivo.required'   => __('Selecciona tu objetivo.'),
+            'frecuencia.required' => __('Selecciona con qué frecuencia quieres venir.'),
+            'telefono.required'   => __('Indica un teléfono de contacto.'),
         ]);
 
-        Cita::create([
-            'user_id'      => auth()->id(),
-            'servicio_id'  => $request->servicio_id ?: null,
-            'nombre'       => $request->nombre,
-            'telefono'     => $request->telefono,
-            'sexo'         => $request->sexo,
-            'respuesta_2'  => $request->respuesta_2,
-            'respuesta_3'  => $request->respuesta_3,
-            'estado'       => 'pendiente',
-        ]);
+        $user->update($datos + ['perfil_completado_at' => now()]);
 
-        return redirect()->route('cuestionario.gracias');
-    }
-
-    public function gracias()
-    {
-        return view('cuestionario.gracias');
+        return redirect()->intended(route('servicios'))
+            ->with('success', __('¡Gracias! Ya puedes reservar tus servicios.'));
     }
 }

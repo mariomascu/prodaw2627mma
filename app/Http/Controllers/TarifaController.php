@@ -8,10 +8,9 @@ class TarifaController extends Controller
 {
     public function index()
     {
-        $cursos   = Servicio::where('tipo', 'cursos')->orderBy('orden')->get();
-        $masajes  = Servicio::where('tipo', 'masajes')->orderBy('orden')->get();
-        $yoga     = Servicio::where('tipo', 'yoga')->orderBy('orden')->get();
+        // Todos los servicios de una sola consulta, agrupados por tipo (masajes, yoga, cursos)
+        $porTipo = Servicio::with('traducciones')->orderBy('orden')->get()->groupBy('tipo');
 
-        return view('tarifas.index', compact('cursos', 'masajes', 'yoga'));
+        return view('tarifas.index', compact('porTipo'));
     }
 }

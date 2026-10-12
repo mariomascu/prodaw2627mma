@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'YoguiFit') }}</title>
+    <title>YoguiFit</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Montez&family=Geologica:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -25,7 +25,13 @@
             font-family: 'Montez', cursive; font-size: 3rem; color: #fff;
             margin-bottom: 1.5rem; text-align: center;
         }
-        .auth-logo span { color: var(--salmon); }
+        .auth-logo { display: inline-flex; align-items: center; gap: .5rem; text-decoration: none; }
+        .logo-icono {
+            display: inline-block; width: 1em; height: 1em; background: currentColor;
+            -webkit-mask: url('{{ asset('img/logo_yoguifit.webp') }}') center / contain no-repeat;
+                    mask: url('{{ asset('img/logo_yoguifit.webp') }}') center / contain no-repeat;
+        }
+        .auth-logo .logo-icono { font-size: 2.6rem; }
         .auth-card {
             background: #fff; border-radius: 18px;
             padding: 2.5rem 2rem; width: 100%; max-width: 420px;
@@ -65,12 +71,13 @@
     </style>
 </head>
 <body>
-    <a href="/" class="auth-logo">Yogui<span>Fit</span></a>
+    <a href="/" class="auth-logo"><span class="logo-icono" aria-hidden="true"></span>YoguiFit</a>
     <div class="auth-card">
         {{ $slot }}
     </div>
     <div style="color:rgba(255,255,255,.6);font-size:.78rem;margin-top:1.5rem">
-        © {{ date('Y') }} YoguiFit · Especialistas en terapia deportiva
+        © {{ date('Y') }} YoguiFit · {{ __('Especialistas en terapia deportiva') }}
     </div>
+@include('partials.mostrar-contrasena')
 </body>
 </html>

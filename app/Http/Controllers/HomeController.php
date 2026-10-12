@@ -11,6 +11,19 @@ class HomeController extends Controller
         return view('home');
     }
 
+    /** Página que explica los niveles de fidelidad y, si hay sesión, el progreso del cliente. */
+    public function niveles()
+    {
+        $user = auth()->user();
+        $sesiones = $user?->sesionesReservadas();
+
+        return view('info.niveles', [
+            'sesiones'  => $sesiones,
+            'nivel'     => $user?->nivel($sesiones),
+            'siguiente' => $user?->siguienteNivel($sesiones),
+        ]);
+    }
+
     public function contacto()
     {
         return view('info.contacto');

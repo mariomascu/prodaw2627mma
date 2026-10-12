@@ -13,6 +13,16 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Vercel sirve la app detrás de su proxy: así las URLs se generan con https.
         $middleware->trustProxies(at: '*');
+
+        // Idioma de cada página (selector de idioma)
+        $middleware->web(append: [
+            \App\Http\Middleware\EstablecerIdioma::class,
+        ]);
+
+        $middleware->alias([
+            'admin'  => \App\Http\Middleware\EsAdmin::class,
+            'perfil' => \App\Http\Middleware\PerfilCompleto::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

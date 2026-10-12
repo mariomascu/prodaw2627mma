@@ -46,6 +46,7 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // Nada más registrarse responde el cuestionario (una sola vez)
+        return redirect()->route('cuestionario');
     }
 }

@@ -1,5 +1,5 @@
 @extends('layouts.yoguifit')
-@section('title', 'Tarifas — YoguiFit')
+@section('title', __('Tarifas') . ' — YoguiFit')
 
 @push('styles')
 <style>
@@ -74,80 +74,44 @@
 @section('content')
 
 <div class="page-banner">
-    <h1><i class="bi bi-tag"></i> Tarifas</h1>
-    <p>Todos nuestros servicios con precios claros y transparentes</p>
+    <h1><i class="bi bi-tag"></i> {{ __('Tarifas') }}</h1>
+    <p>{{ __('Todos nuestros servicios con precios claros y transparentes') }}</p>
 </div>
 
 <div class="container tarifas-section">
 
-    <h2 class="seccion-titulo"><i class="bi bi-mortarboard-fill"></i> Cursos</h2>
-    @foreach($cursos as $s)
+    @php
+        $descuento = auth()->user()?->nivel()['descuento'] ?? 0;
+        $iconos = ['masajes' => 'bi-hand-index-thumb-fill', 'yoga' => 'bi-flower1', 'cursos' => 'bi-mortarboard-fill'];
+    @endphp
+
+    @foreach(\App\Models\Servicio::TIPOS as $clave => $nombre)
+    <h2 class="seccion-titulo"><i class="bi {{ $iconos[$clave] }}"></i> {{ __($nombre) }}</h2>
+    @foreach($porTipo[$clave] ?? [] as $s)
     <div class="tarifa-card">
         <div class="tarifa-header" onclick="toggleTarifa(this)">
             <div class="tarifa-titulo-wrap">
-                <span class="tarifa-titulo">{{ $s->titulo }}</span>
+                <span class="tarifa-titulo">{{ $s->t('titulo') }}</span>
             </div>
             <div class="tarifa-chips">
-                <span class="chip chip-dur"><i class="bi bi-clock"></i> {{ $s->duracion }}</span>
-                <span class="chip chip-price"><i class="bi bi-tag"></i> {{ $s->precio }}</span>
+                <span class="chip chip-dur"><i class="bi bi-clock"></i> {{ $s->t('duracion') }}</span>
+                <span class="chip chip-price"><i class="bi bi-tag"></i> {{ $s->t('precio') }}</span>
             </div>
             <i class="bi bi-chevron-down tarifa-toggle"></i>
         </div>
         <div class="tarifa-body">
-            <p>{{ $s->descripcion }}</p>
-            <a href="{{ route('cuestionario', ['servicio_id' => $s->id]) }}" class="btn-salmon">
-                <i class="bi bi-heart"></i> Lo quiero
-            </a>
+            <p>{{ $s->t('descripcion') }}</p>
+            @include('reservar._boton', ['servicio' => $s])
         </div>
     </div>
     @endforeach
-
-    <h2 class="seccion-titulo"><i class="bi bi-hand-index-thumb-fill"></i> Masajes</h2>
-    @foreach($masajes as $s)
-    <div class="tarifa-card">
-        <div class="tarifa-header" onclick="toggleTarifa(this)">
-            <div class="tarifa-titulo-wrap">
-                <span class="tarifa-titulo">{{ $s->titulo }}</span>
-            </div>
-            <div class="tarifa-chips">
-                <span class="chip chip-dur"><i class="bi bi-clock"></i> {{ $s->duracion }}</span>
-                <span class="chip chip-price"><i class="bi bi-tag"></i> {{ $s->precio }}</span>
-            </div>
-            <i class="bi bi-chevron-down tarifa-toggle"></i>
-        </div>
-        <div class="tarifa-body">
-            <p>{{ $s->descripcion }}</p>
-            <a href="{{ route('cuestionario', ['servicio_id' => $s->id]) }}" class="btn-salmon">
-                <i class="bi bi-heart"></i> Lo quiero
-            </a>
-        </div>
-    </div>
-    @endforeach
-
-    <h2 class="seccion-titulo"><i class="bi bi-flower1"></i> Yoga</h2>
-    @foreach($yoga as $s)
-    <div class="tarifa-card">
-        <div class="tarifa-header" onclick="toggleTarifa(this)">
-            <div class="tarifa-titulo-wrap">
-                <span class="tarifa-titulo">{{ $s->titulo }}</span>
-            </div>
-            <div class="tarifa-chips">
-                <span class="chip chip-dur"><i class="bi bi-clock"></i> {{ $s->duracion }}</span>
-                <span class="chip chip-price"><i class="bi bi-tag"></i> {{ $s->precio }}</span>
-            </div>
-            <i class="bi bi-chevron-down tarifa-toggle"></i>
-        </div>
-        <div class="tarifa-body">
-            <p>{{ $s->descripcion }}</p>
-            <a href="{{ route('cuestionario', ['servicio_id' => $s->id]) }}" class="btn-salmon">
-                <i class="bi bi-heart"></i> Lo quiero
-            </a>
-        </div>
-    </div>
     @endforeach
 
 </div>
 
+@auth
+    @include('reservar._modal')
+@endauth
 @endsection
 
 @push('scripts')

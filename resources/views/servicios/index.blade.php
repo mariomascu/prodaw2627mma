@@ -1,5 +1,5 @@
 @extends('layouts.yoguifit')
-@section('title', 'Servicios — YoguiFit')
+@section('title', __('Servicios') . ' — YoguiFit')
 
 @push('styles')
 <style>
@@ -131,6 +131,7 @@
     }
     .meta-chip.precio { background: var(--salmon); color: #fff; }
 
+    .btn-peq-servicio { font-size: .85rem; padding: .5rem 1.2rem; }
     .servicio-footer { border-top: 1px solid var(--selected-bg); padding-top: .75rem; }
 
     @media (max-width: 768px) {
@@ -151,32 +152,28 @@
 @section('content')
 
 <div class="page-banner">
-    <h1><i class="bi bi-grid-3x3-gap"></i> Servicios</h1>
-    <p>Descubre toda nuestra oferta de masajes, yoga y formación</p>
+    <h1><i class="bi bi-grid-3x3-gap"></i> {{ __('Servicios') }}</h1>
+    <p>{{ __('Descubre toda nuestra oferta de masajes, yoga y formación') }}</p>
 </div>
 
 <div class="tabs-nav">
-    <a href="{{ route('servicios', ['tipo' => 'cursos']) }}"
-       class="tab-btn {{ $tipo === 'cursos' ? 'active' : '' }}">
-        <i class="bi bi-mortarboard"></i> Cursos
-    </a>
-    <a href="{{ route('servicios', ['tipo' => 'masajes']) }}"
-       class="tab-btn {{ $tipo === 'masajes' ? 'active' : '' }}">
-        <i class="bi bi-hand-index-thumb"></i> Masajes
-    </a>
-    <a href="{{ route('servicios', ['tipo' => 'yoga']) }}"
-       class="tab-btn {{ $tipo === 'yoga' ? 'active' : '' }}">
-        <i class="bi bi-flower1"></i> Yoga
-    </a>
+    @php $iconos = ['masajes' => 'bi-hand-index-thumb', 'yoga' => 'bi-flower1', 'cursos' => 'bi-mortarboard']; @endphp
+    @foreach(\App\Models\Servicio::TIPOS as $clave => $nombre)
+        <a href="{{ route('servicios', ['tipo' => $clave]) }}"
+           class="tab-btn {{ $tipo === $clave ? 'active' : '' }}">
+            <i class="bi {{ $iconos[$clave] }}"></i> {{ __($nombre) }}
+        </a>
+    @endforeach
 </div>
 
+@php $descuento = auth()->user()?->nivel()['descuento'] ?? 0; @endphp
 <div class="container">
     <div class="servicios-grid">
         @forelse($servicios as $servicio)
         <article class="servicio-card" style="--i: {{ $loop->index }}">
             <div class="servicio-img {{ $servicio->imagen_url ? '' : 'is-loaded' }}">
                 @if($servicio->imagen_url)
-                    <img src="{{ $servicio->imagen_url }}" alt="{{ $servicio->titulo }}"
+                    <img src="{{ $servicio->imagen_url }}" alt="{{ $servicio->t('titulo') }}"
                          loading="{{ $loop->index < 3 ? 'eager' : 'lazy' }}" decoding="async"
                          onload="this.parentElement.classList.add('is-loaded')"
                          onerror="this.parentElement.classList.add('is-loaded'); this.remove()">
@@ -188,36 +185,36 @@
                 @else
                     <i class="bi bi-flower1"></i>
                 @endif
-                <span class="tipo-badge">{{ ucfirst($servicio->tipo) }}</span>
+                <span class="tipo-badge">{{ __(\App\Models\Servicio::TIPOS[$servicio->tipo] ?? $servicio->tipo) }}</span>
             </div>
             <div class="servicio-body">
-                <h2 class="servicio-titulo">{{ $servicio->titulo }}</h2>
-                <p class="servicio-desc">{{ $servicio->descripcion }}</p>
+                <h2 class="servicio-titulo">{{ $servicio->t('titulo') }}</h2>
+                <p class="servicio-desc">{{ $servicio->t('descripcion') }}</p>
                 <div class="servicio-meta">
                     <span class="meta-chip">
-                        <i class="bi bi-clock"></i> {{ $servicio->duracion }}
+                        <i class="bi bi-clock"></i> {{ $servicio->t('duracion') }}
                     </span>
                     <span class="meta-chip precio">
-                        <i class="bi bi-tag"></i> {{ $servicio->precio }}
+                        <i class="bi bi-tag"></i> {{ $servicio->t('precio') }}
                     </span>
                 </div>
                 <div class="servicio-footer">
-                    <a href="{{ route('cuestionario', ['servicio_id' => $servicio->id]) }}"
-                       class="btn-salmon" style="font-size:.85rem;padding:.5rem 1.2rem">
-                        <i class="bi bi-heart"></i> Lo quiero
-                    </a>
+                    @include('reservar._boton', ['clase' => 'btn-peq-servicio'])
                 </div>
             </div>
         </article>
         @empty
         <div style="grid-column:1/-1;text-align:center;padding:3rem;color:#999">
             <i class="bi bi-inbox" style="font-size:3rem;display:block;margin-bottom:1rem"></i>
-            No hay servicios disponibles en esta categoría.
+            {{ __('No hay servicios disponibles en esta categoría.') }}
         </div>
         @endforelse
     </div>
 </div>
 
+@auth
+    @include('reservar._modal')
+@endauth
 @endsection
 
 @push('scripts')

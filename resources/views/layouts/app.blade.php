@@ -32,5 +32,6 @@
                 {{ $slot }}
             </main>
         </div>
+@include('partials.mostrar-contrasena')
     </body>
 </html>

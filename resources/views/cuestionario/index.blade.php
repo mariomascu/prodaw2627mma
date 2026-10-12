@@ -1,5 +1,5 @@
 @extends('layouts.yoguifit')
-@section('title', 'Reservar sesión — YoguiFit')
+@section('title', __('Cuéntanos sobre ti') . ' — YoguiFit')
 
 @push('styles')
 <style>
@@ -112,6 +112,9 @@
     .servicio-seleccionado i { color: var(--salmon); }
     .servicio-seleccionado strong { font-weight: 600; }
 
+    .btn-primary-yf:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    .aviso-paso { font-size: .82rem; color: #999; margin-top: 1rem; text-align: center; }
+
     @media (max-width: 768px) {
         .cuestionario-wrap { padding: 2rem 1rem; }
         .steps-bar { margin-bottom: 1.5rem; }
@@ -126,14 +129,18 @@
 @section('content')
 
 <div class="page-banner">
-    <h1><i class="bi bi-calendar-check"></i> Reservar sesión</h1>
-    <p>Para ofrecerte nuestra disponibilidad necesitamos que respondas honestamente a 4 cuestiones</p>
+    <h1><i class="bi bi-person-check"></i> {{ __('Cuéntanos sobre ti') }}</h1>
+    <p>{{ __('Solo te lo preguntamos una vez: así podemos ofrecerte el tratamiento más adecuado') }}</p>
 </div>
 
 <div class="cuestionario-wrap">
 
+    @if($errors->any())
+        <div class="alert alert-error"><i class="bi bi-exclamation-circle"></i> {{ $errors->first() }}</div>
+    @endif
+
     <!-- Barra de progreso -->
-    <div class="steps-bar" id="stepsBar">
+    <div class="steps-bar">
         <div class="step active" id="step-1">1</div>
         <div class="step-line" id="line-1"></div>
         <div class="step" id="step-2">2</div>
@@ -143,98 +150,79 @@
         <div class="step" id="step-4">4</div>
     </div>
 
-    <form method="POST" action="{{ route('cuestionario.store') }}" id="reservaForm">
+    <form method="POST" action="{{ route('cuestionario.store') }}">
         @csrf
-        @if($servicio)
-            <input type="hidden" name="servicio_id" value="{{ $servicio->id }}">
-        @endif
 
-        <!-- Paso 1: Género -->
+        <!-- Paso 1: Sexo -->
         <div class="panel active" id="panel-1">
-            <h2>¿Cuál es tu sexo?</h2>
-            <p class="panel-desc">Ayúdanos a personalizar tu experiencia y recomendarte el tratamiento más adecuado.</p>
-            @if($servicio)
-            <div class="servicio-seleccionado">
-                <i class="bi bi-check-circle-fill"></i>
-                Servicio seleccionado: <strong>{{ $servicio->titulo }}</strong> — {{ $servicio->precio }}
-            </div>
-            @endif
-            <input type="hidden" name="sexo" id="sexoInput">
+            <h2>{{ __('¿Cuál es tu sexo?') }}</h2>
+            <p class="panel-desc">{{ __('Ayúdanos a personalizar tu experiencia y recomendarte el tratamiento más adecuado.') }}</p>
+            <input type="hidden" name="sexo" id="input-1" value="{{ old('sexo') }}">
             <div class="gender-options">
-                <button type="button" class="gender-btn" onclick="selectGender(this, 'masculino')">
-                    <i class="bi bi-gender-male"></i>
-                    Masculino
+                @foreach($sexos as $valor => $texto)
+                <button type="button" class="gender-btn opcion" data-paso="1" data-valor="{{ $valor }}">
+                    <i class="bi bi-gender-{{ $valor === 'masculino' ? 'male' : 'female' }}"></i>
+                    {{ __($texto) }}
                 </button>
-                <button type="button" class="gender-btn" onclick="selectGender(this, 'femenino')">
-                    <i class="bi bi-gender-female"></i>
-                    Femenino
-                </button>
+                @endforeach
             </div>
         </div>
 
-        <!-- Paso 2 -->
+        <!-- Paso 2: Objetivo -->
         <div class="panel" id="panel-2">
-            <h2>¿Cuál es tu objetivo?</h2>
-            <p class="panel-desc">Selecciona la opción que mejor describa tu motivación principal.</p>
-            <input type="hidden" name="respuesta_2" id="resp2Input">
+            <h2>{{ __('¿Cuál es tu objetivo?') }}</h2>
+            <p class="panel-desc">{{ __('Selecciona la opción que mejor describa tu motivación principal.') }}</p>
+            <input type="hidden" name="objetivo" id="input-2" value="{{ old('objetivo') }}">
             <div class="mc-options">
-                @php $opts2 = ['Relajación y reducción del estrés','Alivio de dolor muscular o lesiones','Mejora del rendimiento deportivo','Bienestar general y salud integral'] @endphp
-                @foreach($opts2 as $i => $opt)
-                <button type="button" class="mc-btn" onclick="selectMC(this, 'resp2Input', '{{ $opt }}')">
-                    <div class="mc-icon">{{ chr(65+$i) }}</div>
-                    {{ $opt }}
+                @foreach($objetivos as $valor => $texto)
+                <button type="button" class="mc-btn opcion" data-paso="2" data-valor="{{ $valor }}">
+                    <div class="mc-icon">{{ chr(65 + $loop->index) }}</div>
+                    {{ __($texto) }}
                 </button>
                 @endforeach
             </div>
         </div>
 
-        <!-- Paso 3 -->
+        <!-- Paso 3: Frecuencia -->
         <div class="panel" id="panel-3">
-            <h2>¿Con qué frecuencia?</h2>
-            <p class="panel-desc">¿Con qué frecuencia te gustaría recibir tratamiento?</p>
-            <input type="hidden" name="respuesta_3" id="resp3Input">
+            <h2>{{ __('¿Con qué frecuencia?') }}</h2>
+            <p class="panel-desc">{{ __('¿Con qué frecuencia te gustaría recibir tratamiento?') }}</p>
+            <input type="hidden" name="frecuencia" id="input-3" value="{{ old('frecuencia') }}">
             <div class="mc-options">
-                @php $opts3 = ['Primera vez, quiero probar','Una vez al mes','Cada dos semanas','Semanalmente'] @endphp
-                @foreach($opts3 as $i => $opt)
-                <button type="button" class="mc-btn" onclick="selectMC(this, 'resp3Input', '{{ $opt }}')">
-                    <div class="mc-icon">{{ chr(65+$i) }}</div>
-                    {{ $opt }}
+                @foreach($frecuencias as $valor => $texto)
+                <button type="button" class="mc-btn opcion" data-paso="3" data-valor="{{ $valor }}">
+                    <div class="mc-icon">{{ chr(65 + $loop->index) }}</div>
+                    {{ __($texto) }}
                 </button>
                 @endforeach
             </div>
         </div>
 
-        <!-- Paso 4: Datos personales -->
+        <!-- Paso 4: Teléfono -->
         <div class="panel" id="panel-4">
-            <h2>Tus datos de contacto</h2>
-            <p class="panel-desc">Necesitamos tus datos para confirmar la reserva y contactar contigo.</p>
+            <h2>{{ __('Tu teléfono de contacto') }}</h2>
+            <p class="panel-desc">{{ __('Lo usaremos para confirmar tus reservas por teléfono o WhatsApp.') }}</p>
             <div class="form-group">
-                <label for="nombre"><i class="bi bi-person"></i> Nombre completo</label>
-                <input type="text" id="nombre" name="nombre" placeholder="Tu nombre y apellidos"
-                       value="{{ old('nombre') }}" required>
-                @error('nombre') <div class="error">{{ $message }}</div> @enderror
-            </div>
-            <div class="form-group">
-                <label for="telefono"><i class="bi bi-telephone"></i> Teléfono</label>
+                <label for="telefono"><i class="bi bi-telephone"></i> {{ __('Teléfono') }}</label>
                 <input type="tel" id="telefono" name="telefono" placeholder="600 000 000"
-                       value="{{ old('telefono') }}" required>
-                @error('telefono') <div class="error">{{ $message }}</div> @enderror
+                       value="{{ old('telefono', auth()->user()->telefono) }}" required>
             </div>
         </div>
 
         <!-- Navegación -->
-        <div class="step-nav" id="stepNav">
-            <button type="button" class="btn-outline-yf" id="btnPrev" onclick="prevStep()" style="display:none">
-                <i class="bi bi-arrow-left"></i> Anterior
+        <div class="step-nav">
+            <button type="button" class="btn-outline-yf" id="btnPrev" style="display:none">
+                <i class="bi bi-arrow-left"></i> {{ __('Anterior') }}
             </button>
             <div></div>
-            <button type="button" class="btn-primary-yf" id="btnNext" onclick="nextStep()">
-                Siguiente <i class="bi bi-arrow-right"></i>
+            <button type="button" class="btn-primary-yf" id="btnNext" disabled>
+                {{ __('Siguiente') }} <i class="bi bi-arrow-right"></i>
             </button>
             <button type="submit" class="btn-salmon" id="btnSubmit" style="display:none">
-                <i class="bi bi-send"></i> Enviar solicitud
+                <i class="bi bi-check-lg"></i> {{ __('Terminar') }}
             </button>
         </div>
+        <p class="aviso-paso" id="avisoPaso">{{ __('Elige una opción para continuar') }}</p>
     </form>
 </div>
 
@@ -242,52 +230,64 @@
 
 @push('scripts')
 <script>
-let currentStep = 1;
-const totalSteps = 4;
+let pasoActual = 1;
+const totalPasos = 4;
 
-function updateUI() {
-    for (let i = 1; i <= totalSteps; i++) {
-        document.getElementById('panel-' + i).classList.toggle('active', i === currentStep);
-        const stepEl = document.getElementById('step-' + i);
-        stepEl.classList.toggle('active', i === currentStep);
-        stepEl.classList.toggle('done', i < currentStep);
-        if (i < totalSteps) {
-            document.getElementById('line-' + i).classList.toggle('done', i < currentStep);
+// En los pasos 1 a 3 hay que elegir una opción; el 4 es el teléfono
+function pasoRespondido() {
+    if (pasoActual === totalPasos) return true;
+    return document.getElementById('input-' + pasoActual).value !== '';
+}
+
+function actualizar() {
+    for (let i = 1; i <= totalPasos; i++) {
+        document.getElementById('panel-' + i).classList.toggle('active', i === pasoActual);
+        document.getElementById('step-' + i).classList.toggle('active', i === pasoActual);
+        document.getElementById('step-' + i).classList.toggle('done', i < pasoActual);
+        if (i < totalPasos) {
+            document.getElementById('line-' + i).classList.toggle('done', i < pasoActual);
         }
     }
-    document.getElementById('btnPrev').style.display = currentStep > 1 ? 'inline-flex' : 'none';
-    document.getElementById('btnNext').style.display = currentStep < totalSteps ? 'inline-flex' : 'none';
-    document.getElementById('btnSubmit').style.display = currentStep === totalSteps ? 'inline-flex' : 'none';
+    document.getElementById('btnPrev').style.display   = pasoActual > 1 ? 'inline-flex' : 'none';
+    document.getElementById('btnNext').style.display   = pasoActual < totalPasos ? 'inline-flex' : 'none';
+    document.getElementById('btnSubmit').style.display = pasoActual === totalPasos ? 'inline-flex' : 'none';
+
+    // "Siguiente" no se puede pulsar hasta elegir una opción
+    document.getElementById('btnNext').disabled = ! pasoRespondido();
+    document.getElementById('avisoPaso').style.display = pasoRespondido() ? 'none' : 'block';
 }
 
-function nextStep() {
-    if (currentStep < totalSteps) {
-        currentStep++;
-        updateUI();
-        window.scrollTo({top: 0, behavior: 'smooth'});
+// Al pulsar una opción se marca y se guarda su valor en el campo oculto del paso
+document.querySelectorAll('.opcion').forEach(boton => {
+    boton.addEventListener('click', () => {
+        const paso = boton.dataset.paso;
+        document.querySelectorAll('.opcion[data-paso="' + paso + '"]').forEach(b => b.classList.remove('selected'));
+        boton.classList.add('selected');
+        document.getElementById('input-' + paso).value = boton.dataset.valor;
+        actualizar();
+    });
+
+    // Si el formulario vuelve con errores, se marcan las opciones que ya había elegido
+    if (document.getElementById('input-' + boton.dataset.paso).value === boton.dataset.valor) {
+        boton.classList.add('selected');
     }
-}
+});
 
-function prevStep() {
-    if (currentStep > 1) {
-        currentStep--;
-        updateUI();
-        window.scrollTo({top: 0, behavior: 'smooth'});
+document.getElementById('btnNext').addEventListener('click', () => {
+    if (pasoRespondido() && pasoActual < totalPasos) {
+        pasoActual++;
+        actualizar();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-}
+});
 
-function selectGender(btn, value) {
-    document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    document.getElementById('sexoInput').value = value;
-    setTimeout(nextStep, 350);
-}
+document.getElementById('btnPrev').addEventListener('click', () => {
+    if (pasoActual > 1) {
+        pasoActual--;
+        actualizar();
+    }
+});
 
-function selectMC(btn, inputId, value) {
-    btn.closest('.mc-options').querySelectorAll('.mc-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    document.getElementById(inputId).value = value;
-    setTimeout(nextStep, 350);
-}
+actualizar();
 </script>
 @endpush

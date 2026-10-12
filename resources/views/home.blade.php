@@ -1,19 +1,15 @@
 @extends('layouts.yoguifit')
-@section('title', 'YoguiFit — Inicio')
+@section('title', 'YoguiFit — ' . __('Inicio'))
 
 @push('styles')
 <style>
     .hero {
-        background: linear-gradient(160deg, var(--primary-dark) 0%, var(--primary) 50%, var(--secondary) 100%);
+        /* Fondo de mandala en mosaico (public/img/fondo_mandala_blanco_contraste.webp) */
+        background: #e6f1ef url('{{ asset('img/fondo_mandala_blanco_contraste.webp') }}') repeat center top;
         min-height: 80vh;
         display: flex; align-items: center; justify-content: center;
-        text-align: center; color: #fff; padding: 3rem 1.5rem;
+        text-align: center; color: var(--primary-dark); padding: 3rem 1.5rem;
         position: relative; overflow: hidden;
-    }
-    .hero::before {
-        content: '';
-        position: absolute; inset: 0;
-        background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M40 40c0-11.046-8.954-20-20-20S0 28.954 0 40s8.954 20 20 20 20-8.954 20-20zm20 0c0 11.046 8.954 20 20 20s20-8.954 20-20-8.954-20-20-20-20 8.954-20 20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     }
     .hero-content { position: relative; max-width: 820px; width: 100%; }
     .hero-logo {
@@ -21,47 +17,60 @@
         font-size: 5rem;
         line-height: 1;
         margin-bottom: .5rem;
-        text-shadow: 0 3px 20px rgba(0,0,0,.3);
+        color: var(--primary);
+        display: inline-flex; align-items: center; gap: .25em;
     }
-    .hero-logo span { color: var(--salmon); }
+    .hero-logo .logo-icono { font-size: .95em; }
     .hero-slogan {
         font-size: 1.15rem;
-        font-weight: 300;
-        opacity: .9;
+        font-weight: 400;
+        color: var(--primary-dark);
         margin-bottom: 2.5rem;
         letter-spacing: .02em;
     }
     .hero-divider {
         width: 80px; height: 3px;
-        background: var(--salmon);
+        background: var(--primary);
         margin: 1rem auto 2rem;
         border-radius: 2px;
     }
     .hero-actions {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 1rem;
-        max-width: 820px;
+        max-width: 640px;
         margin: 0 auto;
     }
+    /* Botones del hero: verde turquesa */
     .action-card {
-        background: rgba(255,255,255,.12);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255,255,255,.25);
+        background: var(--primary);
+        border: 1px solid var(--primary);
         border-radius: 14px;
         padding: 1.5rem 1rem;
         text-decoration: none;
         color: #fff;
-        transition: background .2s, transform .2s;
+        box-shadow: 0 6px 18px rgba(52,130,137,.28);
+        transition: background .2s, transform .2s, box-shadow .2s;
         display: flex; flex-direction: column; align-items: center; gap: .6rem;
     }
     .action-card:hover {
-        background: rgba(255,255,255,.22);
+        background: var(--primary2);
         transform: translateY(-4px);
+        box-shadow: 0 10px 24px rgba(52,130,137,.35);
         color: #fff;
     }
-    .action-card i { font-size: 2.2rem; color: var(--salmon); }
+    .action-card i { font-size: 2.2rem; color: #fff; }
     .action-card span { font-size: .95rem; font-weight: 500; text-transform: uppercase; letter-spacing: .05em; text-align: center; }
+    .hero-reservar { margin-top: 1.75rem; }
+    .btn-reservar-hero {
+        display: inline-flex; align-items: center; gap: .5rem;
+        background: var(--primary-dark); color: #fff; text-decoration: none;
+        font-size: 1rem; padding: .85rem 2.2rem; border-radius: 25px;
+        box-shadow: 0 6px 20px rgba(18,52,55,.3);
+        text-transform: uppercase; letter-spacing: .05em; font-weight: 500;
+        transition: background .2s, transform .2s;
+    }
+    .btn-reservar-hero:hover { background: var(--primary); color: #fff; transform: translateY(-2px); }
 
     /* Sección características */
     .features { background: #fff; padding: 4rem 0; }
@@ -101,12 +110,13 @@
 
     @media (max-width: 768px) {
         .hero { min-height: auto; padding: 3rem 1rem; }
-        .hero-logo { font-size: 3.6rem; }
+        .hero-logo { font-size: 3.4rem; }
         .hero-slogan { font-size: 1rem; margin-bottom: 1.75rem; }
-        .hero-actions { grid-template-columns: repeat(2, 1fr); gap: .75rem; }
-        .action-card { padding: 1.25rem .5rem; }
-        .action-card i { font-size: 1.9rem; }
-        .action-card span { font-size: .8rem; }
+        /* Las 3 tarjetas siguen en una fila, más compactas */
+        .hero-actions { gap: .6rem; }
+        .action-card { padding: 1rem .35rem; gap: .45rem; border-radius: 12px; }
+        .action-card i { font-size: 1.7rem; }
+        .action-card span { font-size: .72rem; letter-spacing: .03em; }
         .features { padding: 2.5rem 0; }
         .features-grid { gap: 1rem; }
         .feature-item { padding: 1rem .5rem; }
@@ -120,33 +130,34 @@
 
 <section class="hero">
     <div class="hero-content">
-        <div class="hero-logo">Yogui<span>Fit</span></div>
+        <div class="hero-logo"><span class="logo-icono" aria-hidden="true"></span>YoguiFit</div>
         <div class="hero-divider"></div>
-        <p class="hero-slogan">Especialistas en terapia deportiva y masaje Thai Fusión</p>
+        <p class="hero-slogan">{{ __('Especialistas en terapia deportiva y masaje Thai Fusión') }}</p>
         <div class="hero-actions">
             <a href="{{ route('servicios') }}" class="action-card">
                 <i class="bi bi-grid-3x3-gap-fill"></i>
-                <span>Servicios</span>
+                <span>{{ __('Servicios') }}</span>
             </a>
             <a href="{{ route('tarifas') }}" class="action-card">
                 <i class="bi bi-tag-fill"></i>
-                <span>Tarifas</span>
-            </a>
-            <a href="{{ route('cuestionario') }}" class="action-card">
-                <i class="bi bi-calendar-check-fill"></i>
-                <span>Reservar sesión</span>
+                <span>{{ __('Tarifas') }}</span>
             </a>
             @auth
             <a href="{{ route('citas') }}" class="action-card">
                 <i class="bi bi-clock-history"></i>
-                <span>Mis citas</span>
+                <span>{{ __('Mis citas') }}</span>
             </a>
             @else
             <a href="{{ route('login') }}" class="action-card">
                 <i class="bi bi-person-circle"></i>
-                <span>Ver mis citas</span>
+                <span>{{ __('Ver mis citas') }}</span>
             </a>
             @endauth
+        </div>
+        <div class="hero-reservar">
+            <a href="{{ route('servicios') }}" class="btn-reservar-hero">
+                <i class="bi bi-calendar-check"></i> {{ __('Reservar servicio') }}
+            </a>
         </div>
     </div>
 </section>
@@ -156,23 +167,23 @@
         <div class="features-grid">
             <div class="feature-item">
                 <i class="bi bi-award"></i>
-                <h3>Terapeutas certificados</h3>
-                <p>Profesionales con formación especializada en masaje Thai y terapia deportiva.</p>
+                <h3>{{ __('Terapeutas certificados') }}</h3>
+                <p>{{ __('Profesionales con formación especializada en masaje Thai y terapia deportiva.') }}</p>
             </div>
             <div class="feature-item">
                 <i class="bi bi-heart-pulse"></i>
-                <h3>Bienestar integral</h3>
-                <p>Combinamos técnicas orientales y occidentales para un tratamiento completo.</p>
+                <h3>{{ __('Bienestar integral') }}</h3>
+                <p>{{ __('Combinamos técnicas orientales y occidentales para un tratamiento completo.') }}</p>
             </div>
             <div class="feature-item">
                 <i class="bi bi-stars"></i>
-                <h3>Yoga terapéutico</h3>
-                <p>Clases adaptadas a todos los niveles para mejorar tu salud y equilibrio.</p>
+                <h3>{{ __('Yoga terapéutico') }}</h3>
+                <p>{{ __('Clases adaptadas a todos los niveles para mejorar tu salud y equilibrio.') }}</p>
             </div>
             <div class="feature-item">
                 <i class="bi bi-mortarboard"></i>
-                <h3>Formación profesional</h3>
-                <p>Cursos y talleres para quienes desean aprender y crecer en el sector.</p>
+                <h3>{{ __('Formación profesional') }}</h3>
+                <p>{{ __('Cursos y talleres para quienes desean aprender y crecer en el sector.') }}</p>
             </div>
         </div>
     </div>
@@ -180,14 +191,14 @@
 
 <section class="cta-section">
     <div class="container">
-        <h2>¿Listo para empezar?</h2>
-        <p>Reserva tu primera sesión y descubre cómo podemos ayudarte.</p>
+        <h2>{{ __('¿Listo para empezar?') }}</h2>
+        <p>{{ __('Reserva tu primera sesión y descubre cómo podemos ayudarte.') }}</p>
         <div class="cta-actions">
-            <a href="{{ route('cuestionario') }}" class="btn-salmon">
-                <i class="bi bi-calendar-plus"></i> Reservar ahora
+            <a href="{{ route('servicios') }}" class="btn-salmon">
+                <i class="bi bi-calendar-plus"></i> {{ __('Reservar ahora') }}
             </a>
             <a href="{{ route('servicios') }}" class="btn-outline-yf" style="border-color:#fff;color:#fff">
-                <i class="bi bi-eye"></i> Ver servicios
+                <i class="bi bi-eye"></i> {{ __('Ver servicios') }}
             </a>
         </div>
     </div>

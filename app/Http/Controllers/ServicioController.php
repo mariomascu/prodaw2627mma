@@ -9,13 +9,12 @@ class ServicioController extends Controller
 {
     public function index(Request $request)
     {
-        $tipo = $request->get('tipo', 'cursos');
-        $tipos = ['cursos', 'masajes', 'yoga'];
-        if (!in_array($tipo, $tipos)) {
-            $tipo = 'cursos';
+        $tipo = $request->get('tipo', 'masajes');
+        if (! array_key_exists($tipo, Servicio::TIPOS)) {
+            $tipo = 'masajes';
         }
 
-        $servicios = Servicio::where('tipo', $tipo)->orderBy('orden')->get();
+        $servicios = Servicio::with('traducciones')->where('tipo', $tipo)->orderBy('orden')->get();
 
         return view('servicios.index', compact('servicios', 'tipo'));
     }
