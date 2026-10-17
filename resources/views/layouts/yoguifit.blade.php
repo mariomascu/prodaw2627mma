@@ -179,10 +179,6 @@
         .menu-cuerpo a i { color: var(--primary); font-size: 1.05rem; width: 1.2rem; text-align: center; }
         .menu-cuerpo a:hover { background: var(--selected-bg); }
         .menu-cuerpo a.activo { font-weight: 600; background: #eef5f4; }
-        .menu-cuerpo .menu-idiomas { display: flex; flex-wrap: wrap; gap: .4rem; padding: .25rem 1.25rem .5rem; }
-        .menu-cuerpo .menu-idiomas a { padding: .45rem .6rem; border: 2px solid transparent; border-radius: 10px; }
-        .menu-cuerpo .menu-idiomas a .bandera { width: 30px; height: 21px; }
-        .menu-cuerpo .menu-idiomas a.activo { border-color: var(--primary); background: #eef5f4; }
 
         .menu-pie { border-top: 1px solid var(--selected-bg); padding: 1rem 1.25rem; }
         .menu-version { font-size: .78rem; color: #888; display: flex; align-items: center; gap: .35rem; }
@@ -195,9 +191,6 @@
 
         @media(max-width: 900px) {
             .nav-links, .nav-auth { display: none; }
-        }
-        @media(min-width: 769px) {
-            .menu-solo-movil { display: none; }
         }
         @media(max-width: 768px) {
             .btn-menu .btn-menu-texto { display: none; }
@@ -423,17 +416,6 @@
             @endif
         @endauth
 
-        @if(count(\App\Models\Ajuste::idiomasActivos()) > 1)
-            {{-- En escritorio el idioma se elige en el header; en el menú lateral solo aparece en móvil --}}
-            <div class="menu-solo-movil">
-            <div class="menu-seccion">{{ __('Idioma') }}</div>
-            <div class="menu-idiomas">
-                @foreach(\App\Models\Ajuste::idiomasActivos() as $codigo => $nombre)
-                    <a href="{{ route('idioma', $codigo) }}" class="{{ app()->getLocale() === $codigo ? 'activo' : '' }}" title="{{ $nombre }}" aria-label="{{ $nombre }}"><img src="{{ \App\Models\Ajuste::bandera($codigo) }}" alt="" class="bandera"></a>
-                @endforeach
-            </div>
-            </div>
-        @endif
 
         <div class="menu-seccion">{{ __('Información') }}</div>
         <a href="{{ route('contacto') }}"><i class="bi bi-telephone"></i> {{ __('Contacto') }}</a>

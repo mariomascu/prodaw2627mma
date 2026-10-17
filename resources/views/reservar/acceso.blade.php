@@ -23,6 +23,11 @@
                 <a href="{{ route('register') }}" class="btn-salmon"><i class="bi bi-person-plus"></i> {{ __('Registrarme') }}</a>
                 <a href="{{ route('login') }}" class="btn-outline-yf"><i class="bi bi-box-arrow-in-right"></i> {{ __('Ya tengo cuenta') }}</a>
             </div>
+            @if(\App\Http\Controllers\Auth\GoogleController::configurado())
+                <div style="margin-top:1rem;max-width:340px">
+                    @include('auth._boton-google', ['separador' => false])
+                </div>
+            @endif
         </div>
     </div>
 </div>

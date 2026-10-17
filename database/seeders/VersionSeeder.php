@@ -95,6 +95,11 @@ class VersionSeeder extends Seeder
                 'Letrero salmón «Consigue un X % de descuento con tu nivel…» y página que explica los niveles Bronze, Silver y Gold.',
                 'Selector de idioma: solo banderas en el pie, el desplegable del header se cierra al pulsar fuera y en el menú lateral solo aparece en móvil.',
             ]],
+            ['0.0.18', '2026-10-17', [
+                'Registro e inicio de sesión con Google («Continuar con Google»).',
+                'Si ya existía una cuenta con el mismo correo, se enlaza con Google.',
+                'El menú lateral ya no muestra el selector de idioma (se elige en el header y en el pie).',
+            ]],
         ];
 
         foreach ($versiones as [$numero, $fecha, $cambios]) {

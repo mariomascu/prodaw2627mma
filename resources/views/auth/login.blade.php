@@ -9,6 +9,8 @@
         <div class="error-msg">{{ $errors->first() }}</div>
     @endif
 
+    @include('auth._boton-google')
+
     <form method="POST" action="{{ route('login') }}">
         @csrf
         <div class="form-group">

@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    // Inicio de sesión con Google (Laravel Socialite). Las claves están en .env y en Vercel.
+    // La dirección de vuelta es relativa: Socialite le añade el dominio con el que se abre la web
+    // (http://localhost:8000 en local, https://prodaw2627mma.vercel.app en producción).
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => '/auth/google/callback',
+    ],
+
 ];
