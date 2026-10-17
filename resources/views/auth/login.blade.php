@@ -16,7 +16,7 @@
         <div class="form-group">
             <label for="email"><i class="bi bi-envelope"></i> {{ __('Correo electrónico o usuario') }}</label>
             <input type="text" id="email" name="email" value="{{ old('email') }}"
-                   placeholder="{{ __('Introduce tu correo electrónico') }}" required autofocus autocomplete="username">
+                   placeholder="{{ __('Introduce tu correo electrónico') }}" required autocomplete="username">
         </div>
         <div class="form-group">
             <label for="password"><i class="bi bi-lock"></i> {{ __('Contraseña') }}</label>

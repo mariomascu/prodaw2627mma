@@ -18,7 +18,7 @@
         <div class="form-group">
             <label for="email"><i class="bi bi-envelope"></i> {{ __('Correo electrónico') }}</label>
             <input type="email" id="email" name="email" value="{{ old('email') }}"
-                   placeholder="{{ __('Tu dirección de correo') }}" required autofocus>
+                   placeholder="{{ __('Tu dirección de correo') }}" required>
         </div>
         <button type="submit" class="btn-auth">
             <i class="bi bi-send"></i> {{ __('Enviar enlace de recuperación') }}

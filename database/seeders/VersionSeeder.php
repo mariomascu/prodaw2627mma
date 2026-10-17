@@ -100,6 +100,10 @@ class VersionSeeder extends Seeder
                 'Si ya existía una cuenta con el mismo correo, se enlaza con Google.',
                 'El menú lateral ya no muestra el selector de idioma (se elige en el header y en el pie).',
             ]],
+            ['0.0.19', '2026-10-17', [
+                'Las páginas de acceso, registro y perfil ya no ponen el foco en ningún campo al cargarse (en el móvil no se abre el teclado solo).',
+                'En el móvil, al tocar un campo la pantalla sube para dejarlo arriba con el siguiente campo a la vista.',
+            ]],
         ];
 
         foreach ($versiones as [$numero, $fecha, $cambios]) {

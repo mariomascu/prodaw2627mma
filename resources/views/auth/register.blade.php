@@ -12,7 +12,7 @@
         <div class="form-group">
             <label for="name"><i class="bi bi-person"></i> {{ __('Nombre') }}</label>
             <input type="text" id="name" name="name" value="{{ old('name') }}"
-                   placeholder="{{ __('Tu nombre completo') }}" required autofocus>
+                   placeholder="{{ __('Tu nombre completo') }}" required>
         </div>
         <div class="form-group">
             <label for="email"><i class="bi bi-envelope"></i> {{ __('Correo electrónico') }}</label>

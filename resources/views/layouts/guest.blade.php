@@ -68,6 +68,18 @@
         .checkbox-group { display: flex; align-items: center; gap: .5rem; margin: .5rem 0; }
         .checkbox-group input { width: auto; accent-color: var(--primary); }
         .checkbox-group label { font-size: .85rem; color: #666; cursor: pointer; }
+
+        /* ──────── MÓVIL: teclado ──────── */
+        /* Al subir la pantalla, el campo queda con un poco de aire por encima (para ver su etiqueta) */
+        .auth-card input, .auth-card .form-group { scroll-margin-top: 1rem; }
+        @media (max-width: 768px) {
+            /* En el móvil el formulario empieza arriba (centrado, saltaría al abrirse el teclado) */
+            body { justify-content: flex-start; padding-top: 1.5rem; }
+            .auth-logo { margin-bottom: 1rem; }
+            .auth-card { padding: 1.75rem 1.25rem; }
+            /* Mientras el teclado está abierto se añade hueco debajo para poder subir el campo arriba */
+            body.teclado-abierto { padding-bottom: 60vh; }
+        }
     </style>
 </head>
 <body>
@@ -79,5 +91,45 @@
         © {{ date('Y') }} YoguiFit · {{ __('Especialistas en terapia deportiva') }}
     </div>
 @include('partials.mostrar-contrasena')
+
+<script>
+// En el móvil, al tocar un campo se abre el teclado y tapa media pantalla.
+// Se sube la página para dejar ese campo arriba, con su etiqueta, y el siguiente campo a la vista.
+(function () {
+    if (!window.matchMedia('(max-width: 768px)').matches) return;
+
+    const selector = '.auth-card input:not([type=checkbox]):not([type=hidden]), .auth-card textarea';
+    let campoActivo = null;
+
+    function subirCampo() {
+        if (!campoActivo) return;
+        // Se sube el bloque completo (etiqueta + campo); en los formularios de Breeze, su <div>
+        const bloque = campoActivo.closest('.form-group') || campoActivo.parentElement;
+        bloque.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }
+
+    document.addEventListener('focusin', e => {
+        if (!e.target.matches(selector)) return;
+        campoActivo = e.target;
+        document.body.classList.add('teclado-abierto');
+        setTimeout(subirCampo, 300); // se espera a que termine de aparecer el teclado
+    });
+
+    document.addEventListener('focusout', () => {
+        // Si el foco pasa a otro campo del formulario, el hueco se mantiene
+        setTimeout(() => {
+            if (!document.activeElement || !document.activeElement.matches(selector)) {
+                campoActivo = null;
+                document.body.classList.remove('teclado-abierto');
+            }
+        }, 150);
+    });
+
+    // Cuando el teclado termina de abrirse (o cambia de tamaño) se vuelve a colocar el campo
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', () => setTimeout(subirCampo, 50));
+    }
+})();
+</script>
 </body>
 </html>
