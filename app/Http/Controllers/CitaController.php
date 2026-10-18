@@ -9,11 +9,12 @@ use Illuminate\Http\Request;
 
 class CitaController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, Agenda $agenda)
     {
+        $agenda->liberarPagosCaducados();
         $user = $request->user();
 
-        $citas = Cita::with(['servicio.traducciones', 'solicitudPendiente'])
+        $citas = Cita::with(['servicio.traducciones', 'solicitudPendiente', 'pago', 'bono'])
             ->where('user_id', $user->id)
             ->orderByRaw('inicio is null')      // primero las que tienen fecha
             ->orderByDesc('inicio')
@@ -24,6 +25,7 @@ class CitaController extends Controller
 
         return view('citas.index', [
             'citas'     => $citas,
+            'bonos'     => $user->bonos()->with('servicio.traducciones')->where('estado', 'activo')->latest()->get(),
             'sesiones'  => $sesiones,
             'nivel'     => $user->nivel($sesiones),
             'siguiente' => $user->siguienteNivel($sesiones),
@@ -59,8 +61,12 @@ class CitaController extends Controller
             return back()->with('error', __('Solo puedes cancelar una cita con al menos 24 horas de antelación. Llámanos si lo necesitas.'));
         }
 
-        $agenda->cancelar($cita);
+        $reembolso = $agenda->cancelar($cita);
 
-        return back()->with('success', __('Cita cancelada.'));
+        return back()->with('success', match ($reembolso) {
+            true    => __('Cita cancelada. Te hemos devuelto el importe.'),
+            false   => __('Cita cancelada. No hemos podido hacer la devolución automática; contacta con nosotros.'),
+            default => __('Cita cancelada.'),
+        });
     }
 }

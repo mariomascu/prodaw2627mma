@@ -112,6 +112,22 @@ class Servicio extends Model
         return $minutos > 0 ? $minutos : 60;
     }
 
+    /** Sesiones que incluye un pack de yoga, sacadas de "duracion": "8 sesiones/mes" → 8. */
+    public function sesionesPack(): int
+    {
+        return preg_match('/(\d+)/', (string) $this->duracion, $m) ? max(1, (int) $m[1]) : 1;
+    }
+
+    /** Primer número de un precio en céntimos: "76,50 €" → 7650; "160 €/mes" → 16000. */
+    public static function importeEnCentimos(string $precio): int
+    {
+        if (! preg_match('/\d+(?:[.,]\d+)?/', $precio, $m)) {
+            return 0;
+        }
+
+        return (int) round((float) str_replace(',', '.', $m[0]) * 100);
+    }
+
     /** Horas de agenda que ocupa una sesión (un masaje de 95 min ocupa 2). */
     public function horasNecesarias(): int
     {

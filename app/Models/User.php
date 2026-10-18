@@ -64,6 +64,18 @@ class User extends Authenticatable
         return $this->hasMany(Cita::class);
     }
 
+    public function bonos()
+    {
+        return $this->hasMany(Bono::class);
+    }
+
+    /** Bono activo de un servicio de yoga con sesiones aún por reservar (o null). */
+    public function bonoDisponible(Servicio $servicio): ?Bono
+    {
+        return $this->bonos()->where('servicio_id', $servicio->id)->where('estado', 'activo')->get()
+            ->first(fn (Bono $bono) => $bono->sesionesLibres() > 0);
+    }
+
     /** Sesiones reservadas por el cliente (todas menos las canceladas). */
     public function sesionesReservadas(): int
     {

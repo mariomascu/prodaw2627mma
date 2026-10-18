@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cita;
 use App\Models\Servicio;
 use App\Services\Agenda;
+use App\Services\Pagos;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -43,7 +44,7 @@ class ReservaController extends Controller
         return response()->json($agenda->horasDisponibles($servicio));
     }
 
-    public function store(Request $request, Servicio $servicio, Agenda $agenda)
+    public function store(Request $request, Servicio $servicio, Agenda $agenda, Pagos $pagos)
     {
         $user = $request->user();
 
@@ -58,6 +59,18 @@ class ReservaController extends Controller
             ]);
 
             $cita = $agenda->reservar($user, $servicio, Carbon::createFromFormat('Y-m-d H:i', $datos['inicio']), $datos['telefono'], $datos['notas'] ?? null);
+
+            // Hay que pagar: se envía al cliente a la página de pago de Stripe (la hora queda apartada)
+            if ($cita->esperandoPago()) {
+                return redirect()->away($pagos->urlDePago($cita->pago, $user->email));
+            }
+
+            // Sesión de yoga que va contra un bono que ya tenía (no lleva precio: no se cobra)
+            if ($cita->bono_id && ! $cita->precio_final) {
+                return redirect()->route('citas')->with('success', __('¡Sesión reservada con tu bono! Te quedan :numero sesiones por reservar.', [
+                    'numero' => $cita->bono->sesionesLibres(),
+                ]));
+            }
 
             return redirect()->route('citas')->with('success', __('¡Reserva confirmada! «:titulo» el :fecha a las :hora.', [
                 'titulo' => $servicio->t('titulo'),

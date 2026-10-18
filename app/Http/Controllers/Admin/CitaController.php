@@ -22,10 +22,15 @@ class CitaController extends Controller
 
         // Al cancelar se liberan sus horas en la agenda
         if ($datos['estado'] === 'cancelada') {
-            $agenda->cancelar($cita);
-        } else {
-            $cita->update($datos);
+            $reembolso = $agenda->cancelar($cita);
+            if ($reembolso === false) {
+                return back()->with('error', __('Cita cancelada, pero Stripe no ha podido devolver el pago. Revísalo en el panel de Stripe.'));
+            }
+
+            return back()->with('success', $reembolso ? __('Cita cancelada y pago devuelto al cliente.') : __('Estado de la cita actualizado.'));
         }
+
+        $cita->update($datos);
 
         return back()->with('success', __('Estado de la cita actualizado.'));
     }

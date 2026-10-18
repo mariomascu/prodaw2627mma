@@ -19,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\EstablecerIdioma::class,
         ]);
 
+        // El webhook de Stripe no puede enviar el token CSRF (no es un formulario de la web);
+        // su seguridad es la firma que comprueba StripeWebhookController
+        $middleware->validateCsrfTokens(except: ['stripe/webhook']);
+
         $middleware->alias([
             'admin'  => \App\Http\Middleware\EsAdmin::class,
             'perfil' => \App\Http\Middleware\PerfilCompleto::class,

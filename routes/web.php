@@ -10,6 +10,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\ServicioImagenController;
 use App\Http\Controllers\IdiomaController;
+use App\Http\Controllers\PagoController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\Admin;
 
 // Home
@@ -23,6 +25,9 @@ Route::get('/tarifas', [TarifaController::class, 'index'])->name('tarifas');
 
 // Cambio de idioma (selector del header, footer y menú lateral)
 Route::get('/idioma/{codigo}', [IdiomaController::class, 'cambiar'])->name('idioma');
+
+// Webhook de Stripe: avisos de pagos (sin sesión ni CSRF; se verifica la firma)
+Route::post('/stripe/webhook', StripeWebhookController::class)->name('stripe.webhook');
 
 // Imagen de un servicio guardada en la base de datos
 Route::get('/servicios/{servicio}/imagen', [ServicioImagenController::class, 'show'])->name('servicios.imagen');
@@ -44,6 +49,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/mis-citas', [CitaController::class, 'index'])->name('citas');
     Route::post('/mis-citas/{cita}/cambio', [CitaController::class, 'solicitarCambio'])->name('citas.cambio');
     Route::post('/mis-citas/{cita}/cancelar', [CitaController::class, 'cancelar'])->name('citas.cancelar');
+
+    // Pago con Stripe: botón «Pagar» y vuelta desde la página de pago
+    Route::post('/mis-citas/{cita}/pagar', [PagoController::class, 'pagar'])->name('citas.pagar');
+    Route::get('/pagos/{pago}/exito', [PagoController::class, 'exito'])->name('pagos.exito');
+    Route::get('/pagos/{pago}/cancelado', [PagoController::class, 'cancelado'])->name('pagos.cancelado');
 });
 
 // Perfil de usuario (Breeze)

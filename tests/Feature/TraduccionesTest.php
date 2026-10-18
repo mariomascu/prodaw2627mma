@@ -43,7 +43,7 @@ class TraduccionesTest extends TestCase
                 $claves[$texto] = true;
             }
         }
-        foreach (['Pendiente', 'Confirmada', 'Cancelada', 'Duración del curso', 'Duración del servicio', 'Sesiones al mes'] as $texto) {
+        foreach (['Pendiente', 'Confirmada', 'Cancelada', 'Pagado', 'Reembolsado', 'Cancelado', 'Duración del curso', 'Duración del servicio', 'Sesiones al mes'] as $texto) {
             $claves[$texto] = true;
         }
 

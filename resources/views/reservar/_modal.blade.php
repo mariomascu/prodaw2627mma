@@ -154,6 +154,8 @@
         preguntaReservar: @js(__('¿Confirmas tu cita?')),
         preguntaCambiar: @js(__('¿Confirmas el cambio de cita?')),
         notaReservar: @js(__('Al confirmar, la cita queda reservada y aparecerá en «Mis citas».')),
+        irAlPago: @js(__('Ir al pago')),
+        notaPago: @js(__('Al confirmar irás a la pasarela de pago segura de Stripe. La hora queda apartada 30 minutos mientras pagas.')),
         notaCambiar: @js(__('El cambio quedará pendiente hasta que lo apruebe el centro.')),
         faltaTelefono: @js(__('Indica un teléfono de contacto.')),
         cargando: @js(__('Cargando horas disponibles…')),
@@ -182,7 +184,9 @@
         document.getElementById('modalSubtitulo').textContent = datos.precio || '';
         document.getElementById('camposReserva').hidden = datos.modo === 'cambiar';
         document.getElementById('modalTelefono').required = datos.modo !== 'cambiar';
-        document.getElementById('modalEnviarTexto').textContent = datos.modo === 'cambiar' ? textos.cambiar : textos.reservar;
+        const conPago = datos.modo !== 'cambiar' && datos.pago === '1';
+        document.getElementById('modalEnviarTexto').textContent =
+            datos.modo === 'cambiar' ? textos.cambiar : (conPago ? textos.irAlPago : textos.reservar);
 
         reiniciar();
         aviso(textos.cargando);
@@ -322,7 +326,9 @@
         document.getElementById('confirmarPrecio').textContent = datosServicio.soloPrecio || datosServicio.precio || '';
         document.getElementById('confirmarTelefono').textContent = telefono.value;
         document.querySelectorAll('#pasoConfirmar .solo-reserva').forEach(el => el.hidden = modo === 'cambiar');
-        document.getElementById('confirmarNota').textContent = modo === 'cambiar' ? textos.notaCambiar : textos.notaReservar;
+        document.getElementById('confirmarNota').textContent = modo === 'cambiar'
+            ? textos.notaCambiar
+            : (datosServicio.pago === '1' ? textos.notaPago : textos.notaReservar);
 
         mostrarPaso('confirmar');
     });

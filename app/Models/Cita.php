@@ -10,7 +10,7 @@ class Cita extends Model
     protected $fillable = [
         'user_id', 'servicio_id', 'nombre', 'telefono',
         'sexo', 'respuesta_2', 'respuesta_3', 'estado', 'notas',
-        'inicio', 'fin', 'descuento', 'precio_final', 'validada_at',
+        'inicio', 'fin', 'descuento', 'precio_final', 'validada_at', 'bono_id',
     ];
 
     protected function casts(): array
@@ -46,6 +46,37 @@ class Cita extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** Bono de yoga contra el que va esta sesión (si la hay). */
+    public function bono()
+    {
+        return $this->belongsTo(Bono::class);
+    }
+
+    public function pagos()
+    {
+        return $this->hasMany(Pago::class);
+    }
+
+    /** Último cobro de la cita (el que cuenta). */
+    public function pago()
+    {
+        return $this->hasOne(Pago::class)->latestOfMany();
+    }
+
+    /** Está esperando a que el cliente pague (la hora queda apartada mientras tanto). */
+    public function esperandoPago(): bool
+    {
+        return $this->estado === 'pendiente' && $this->pago?->estado === 'pendiente';
+    }
+
+    /** Curso aceptado por la administradora que el cliente todavía no ha pagado. */
+    public function cursoPorPagar(): bool
+    {
+        return $this->servicio?->tipo === 'cursos'
+            && $this->estado === 'confirmada'
+            && $this->pago?->estado !== 'pagado';
     }
 
     public function ocupaciones()

@@ -19,7 +19,7 @@ class ValidacionController extends Controller
     {
         abort_unless(hash_equals((string) $cita->codigo, $codigo), 404);
 
-        $cita->load('user', 'servicio');
+        $cita->load('user', 'servicio', 'bono', 'pago');
         $sesiones = $cita->user?->sesionesReservadas() ?? 0;
 
         return view('admin.validar', [
@@ -38,11 +38,21 @@ class ValidacionController extends Controller
         if ($cita->estado === 'cancelada') {
             return back()->with('error', __('Esta cita está cancelada y no se puede validar.'));
         }
+        if ($cita->estado === 'pendiente') {
+            return back()->with('error', __('Esta cita está pendiente de pago y no se puede validar.'));
+        }
         if ($cita->validada_at) {
             return back()->with('error', __('Esta sesión ya se validó el :fecha.', ['fecha' => $cita->validada_at->format('d/m/Y H:i')]));
         }
 
         $cita->update(['validada_at' => now(), 'estado' => 'confirmada']);
+
+        // Clase de yoga con bono: se resta una sesión del pack
+        if ($cita->bono) {
+            $cita->bono->increment('sesiones_usadas');
+
+            return back()->with('success', __('Sesión validada. Quedan :numero sesiones en el bono.', ['numero' => $cita->bono->fresh()->sesionesRestantes()]));
+        }
 
         return back()->with('success', __('Sesión validada como realizada.'));
     }

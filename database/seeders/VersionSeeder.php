@@ -104,6 +104,13 @@ class VersionSeeder extends Seeder
                 'Las páginas de acceso, registro y perfil ya no ponen el foco en ningún campo al cargarse (en el móvil no se abre el teclado solo).',
                 'En el móvil, al tocar un campo la pantalla sube para dejarlo arriba con el siguiente campo a la vista.',
             ]],
+            ['0.0.20', '2026-10-18', [
+                'Pago con Stripe (modo de prueba) al reservar masajes y yoga; la hora queda apartada 30 minutos mientras se paga.',
+                'Yoga: se paga el pack completo y se crea un bono; cada clase validada con el QR resta una sesión.',
+                'Cursos: se pagan después de que la administradora los acepte.',
+                'Al cancelar una cita pagada se devuelve el dinero automáticamente (las clases de yoga vuelven al bono).',
+                'Webhook de Stripe: el pago se confirma en cuanto el cliente termina de pagar, aunque cierre la pestaña.',
+            ]],
         ];
 
         foreach ($versiones as [$numero, $fecha, $cambios]) {

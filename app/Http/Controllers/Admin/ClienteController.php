@@ -32,12 +32,14 @@ class ClienteController extends Controller
     {
         abort_if($cliente->is_admin, 404);
 
-        $citas = $cliente->citas()->with('servicio', 'solicitudPendiente')
+        $citas = $cliente->citas()->with('servicio', 'solicitudPendiente', 'pago', 'bono')
             ->orderByRaw('inicio is null')
             ->orderByDesc('inicio')
             ->orderByDesc('created_at')
             ->get();
 
-        return view('admin.clientes.show', compact('cliente', 'citas'));
+        $bonos = $cliente->bonos()->with('servicio')->where('estado', 'activo')->latest()->get();
+
+        return view('admin.clientes.show', compact('cliente', 'citas', 'bonos'));
     }
 }

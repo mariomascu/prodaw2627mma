@@ -25,6 +25,8 @@
     <div class="validar-card">
         @if($cita->estado === 'cancelada')
             <div class="validar-estado cancelada"><i class="bi bi-x-circle-fill"></i> {{ __('Cita cancelada') }}</div>
+        @elseif($cita->estado === 'pendiente')
+            <div class="validar-estado cancelada"><i class="bi bi-credit-card"></i> {{ __('Pendiente de pago') }}</div>
         @elseif($cita->validada_at)
             <div class="validar-estado realizada"><i class="bi bi-patch-check-fill"></i> {{ __('Sesión realizada el :fecha', ['fecha' => $cita->validada_at->format('d/m/Y H:i')]) }}</div>
         @else
@@ -52,6 +54,19 @@
                 <dd>{{ $cita->precio_final ?? $cita->servicio?->precio ?? '—' }}@if($cita->descuento) (−{{ $cita->descuento }} %)@endif</dd>
                 <dt>{{ __('Sesiones') }}</dt>
                 <dd>{{ $sesiones }}</dd>
+                @if($cita->bono)
+                    <dt>{{ __('Bono') }}</dt>
+                    <dd>
+                        {{ __('Quedan :restantes de :total sesiones', ['restantes' => $cita->bono->sesionesRestantes(), 'total' => $cita->bono->sesiones_totales]) }}
+                        @if(! $cita->validada_at)
+                            <div style="font-weight:400;color:#888;font-size:.85rem">{{ __('Al validar quedarán :numero', ['numero' => max(0, $cita->bono->sesionesRestantes() - 1)]) }}</div>
+                        @endif
+                    </dd>
+                @endif
+                @if($cita->pago)
+                    <dt>{{ __('Pago') }}</dt>
+                    <dd>{{ $cita->pago->importeTexto() }} · {{ __(ucfirst($cita->pago->estado)) }}</dd>
+                @endif
                 @if($cita->notas)
                     <dt>{{ __('Comentarios') }}</dt>
                     <dd style="font-weight:400">{{ $cita->notas }}</dd>
@@ -64,7 +79,7 @@
         @endif
 
         <div class="validar-acciones">
-            @if(! $cita->validada_at && $cita->estado !== 'cancelada')
+            @if(! $cita->validada_at && $cita->estado === 'confirmada')
                 <form method="POST" action="{{ route('admin.citas.validar.store', ['cita' => $cita, 'codigo' => $codigo]) }}">
                     @csrf
                     <button type="submit" class="btn-salmon"><i class="bi bi-check2-circle"></i> {{ __('Validar sesión') }}</button>

@@ -61,6 +61,16 @@
         text-transform: uppercase; letter-spacing: .04em;
     }
     .badge-pendiente { background: #fff3cd; color: #856404; }
+    .pago-ok { color: var(--primary); font-weight: 500; }
+    .bono-card {
+        background: #fff; border-radius: 14px; padding: 1rem 1.25rem; margin-bottom: 1.2rem;
+        box-shadow: 0 2px 12px rgba(52,130,137,.1); display: flex; align-items: center; gap: .9rem; flex-wrap: wrap;
+        font-size: .9rem; color: #555; border-left: 5px solid var(--salmon);
+    }
+    .bono-card > i { font-size: 1.8rem; color: var(--salmon); }
+    .bono-card strong { color: var(--primary-dark); }
+    .bono-barra { flex-basis: 100%; height: 8px; background: var(--selected-bg); border-radius: 4px; overflow: hidden; }
+    .bono-barra span { display: block; height: 100%; background: linear-gradient(90deg, var(--salmon), #f7c2b6); }
     .badge-confirmada { background: var(--selected-bg); color: var(--primary-dark); }
     .badge-cancelada { background: #fde8e8; color: #700; }
 
@@ -106,6 +116,20 @@
         </div>
     </div>
 
+    @foreach($bonos as $bono)
+        <div class="bono-card">
+            <i class="bi bi-ticket-perforated-fill"></i>
+            <div>
+                <strong>{{ $bono->servicio?->t('titulo') ?? __('Bono de yoga') }}</strong><br>
+                {{ __('Te quedan :restantes de :total sesiones', ['restantes' => $bono->sesionesRestantes(), 'total' => $bono->sesiones_totales]) }}
+                @if($bono->sesionesLibres() < $bono->sesionesRestantes())
+                    · {{ __(':numero ya reservadas', ['numero' => $bono->sesionesRestantes() - $bono->sesionesLibres()]) }}
+                @endif
+            </div>
+            <div class="bono-barra"><span style="width: {{ $bono->sesiones_totales ? round($bono->sesionesRestantes() * 100 / $bono->sesiones_totales) : 0 }}%"></span></div>
+        </div>
+    @endforeach
+
     @forelse($citas as $cita)
     <div class="cita-card cita-{{ $cita->estado }}">
         @if($cita->inicio)
@@ -130,8 +154,21 @@
                 @endif
                 @if($cita->precio_final)
                     <span><i class="bi bi-tag"></i> {{ $cita->precio_final }}@if($cita->descuento) (−{{ $cita->descuento }} %)@endif</span>
+                @elseif($cita->bono_id)
+                    <span><i class="bi bi-ticket-perforated"></i> {{ __('Sesión de tu bono') }}</span>
+                @endif
+                @if($cita->pago?->estado === 'pagado')
+                    <span class="pago-ok"><i class="bi bi-credit-card-fill"></i> {{ __('Pagado') }}</span>
+                @elseif($cita->pago?->estado === 'reembolsado')
+                    <span><i class="bi bi-arrow-counterclockwise"></i> {{ __('Reembolsado') }}</span>
                 @endif
             </div>
+
+            @if($cita->esperandoPago())
+                <div class="cita-aviso"><i class="bi bi-credit-card"></i> {{ __('Pendiente de pago: la hora queda apartada unos minutos. Si no se paga, se libera.') }}</div>
+            @elseif($cita->cursoPorPagar() && \App\Services\Pagos::configurado())
+                <div class="cita-aviso"><i class="bi bi-check2-circle"></i> {{ __('¡Tu solicitud ha sido aceptada! Ya puedes pagar el curso.') }}</div>
+            @endif
 
             @if($cita->solicitudPendiente)
                 <div class="cita-aviso">
@@ -147,8 +184,15 @@
                 <div class="cita-meta" style="margin-top:.4rem;color:var(--primary)"><span><i class="bi bi-patch-check-fill"></i> {{ __('Sesión realizada el :fecha', ['fecha' => $cita->validada_at->format('d/m/Y H:i')]) }}</span></div>
             @endif
 
-            @if($cita->tieneQr() || $cita->sePuedeCambiar() || $cita->sePuedeCancelar())
+            @php $puedePagar = \App\Services\Pagos::configurado() && ($cita->esperandoPago() || $cita->cursoPorPagar()); @endphp
+            @if($puedePagar || $cita->tieneQr() || $cita->sePuedeCambiar() || $cita->sePuedeCancelar())
             <div class="cita-acciones">
+                @if($puedePagar)
+                    <form method="POST" action="{{ route('citas.pagar', $cita) }}">
+                        @csrf
+                        <button type="submit" class="btn-salmon btn-qr"><i class="bi bi-credit-card"></i> {{ $cita->esperandoPago() ? __('Completar pago') : __('Pagar') }}</button>
+                    </form>
+                @endif
                 @if($cita->tieneQr())
                     <button type="button" class="btn-primary-yf btn-qr" data-qr="{{ $cita->urlValidacion() }}"
                             data-qr-titulo="{{ $cita->servicio?->t('titulo') }}"

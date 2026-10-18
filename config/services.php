@@ -44,4 +44,12 @@ return [
         'redirect' => '/auth/google/callback',
     ],
 
+    // Pasarela de pago (Stripe Checkout). En modo de prueba la clave empieza por sk_test_.
+    // Sin clave, las reservas se confirman sin pago (útil para desarrollar y para los tests).
+    'stripe' => [
+        'secret' => env('STRIPE_SECRET'),
+        // Secreto de firma del webhook (whsec_…): Stripe Dashboard → Desarrolladores → Webhooks
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+    ],
+
 ];

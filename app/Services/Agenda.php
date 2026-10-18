@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Models\Ajuste;
+use App\Models\Bono;
 use App\Models\Cita;
 use App\Models\Franja;
 use App\Models\Ocupacion;
+use App\Models\Pago;
 use App\Models\Servicio;
 use App\Models\SolicitudCambio;
 use App\Models\User;
@@ -22,6 +24,10 @@ use Illuminate\Validation\ValidationException;
  */
 class Agenda
 {
+    public function __construct(private Pagos $pagos)
+    {
+    }
+
     /**
      * Abre un mes: crea una franja por cada hora en la que cabe una sesión de 60 minutos
      * dentro del horario (p. ej. de 10:00 a 14:00 → 10, 11, 12 y 13 h). No crea horas pasadas.
@@ -68,6 +74,8 @@ class Agenda
      */
     public function horasDisponibles(Servicio $servicio): array
     {
+        $this->liberarPagosCaducados();
+
         $libres = Franja::where('inicio', '>', now())
             ->where('bloqueada', false)
             ->whereDoesntHave('ocupacion')
@@ -90,31 +98,66 @@ class Agenda
         return $disponibles;
     }
 
-    /** Reserva directa de una sesión. Devuelve la cita creada (ya confirmada). */
+    /**
+     * Reserva una sesión de masaje o yoga.
+     * - Con Stripe configurado, la cita queda «pendiente» (con la hora apartada) y se crea un pago pendiente;
+     *   al pagar pasa a «confirmada». Sin Stripe, se confirma directamente.
+     * - Yoga: si el cliente tiene un bono con sesiones libres, la sesión va contra el bono y no se cobra;
+     *   si no, se cobra el pack completo y se crea un bono nuevo con sus sesiones.
+     */
     public function reservar(User $user, Servicio $servicio, Carbon $inicio, string $telefono, ?string $notas = null): Cita
     {
-        // El descuento depende de las sesiones que el cliente tenía ANTES de esta reserva
-        $nivel = $user->nivel();
-        $descuento = $nivel['descuento'] ?? 0;
+        $this->liberarPagosCaducados();
 
-        return $this->conHorasLibres(function () use ($user, $servicio, $inicio, $telefono, $notas, $descuento) {
+        // El descuento depende de las sesiones que el cliente tenía ANTES de esta reserva
+        $descuento = $user->nivel()['descuento'] ?? 0;
+        $bonoExistente = $servicio->tipo === 'yoga' ? $user->bonoDisponible($servicio) : null;
+
+        return $this->conHorasLibres(function () use ($user, $servicio, $inicio, $telefono, $notas, $descuento, $bonoExistente) {
             $franjas = $this->franjasLibres($inicio, $servicio->horasNecesarias());
+            $cobrar = Pagos::configurado() && ! $bonoExistente;
+            $bono = $bonoExistente;
+
+            // Yoga sin bono: se crea el bono del pack (activo al pagarlo)
+            if ($servicio->tipo === 'yoga' && ! $bono) {
+                $bono = Bono::create([
+                    'user_id'          => $user->id,
+                    'servicio_id'      => $servicio->id,
+                    'sesiones_totales' => $servicio->sesionesPack(),
+                    'estado'           => $cobrar ? 'pendiente' : 'activo',
+                ]);
+            }
+
+            $precio = $bonoExistente ? null : Servicio::aplicarDescuento($servicio->precio, $descuento);
 
             $cita = Cita::create([
                 'user_id'      => $user->id,
                 'servicio_id'  => $servicio->id,
+                'bono_id'      => $bono?->id,
                 'nombre'       => $user->name,
                 'telefono'     => $telefono,
                 'notas'        => $notas,
-                'estado'       => 'confirmada',
+                'estado'       => $cobrar ? 'pendiente' : 'confirmada',
                 'inicio'       => $inicio,
                 'fin'          => $inicio->copy()->addMinutes($servicio->minutosSesion()),
-                'descuento'    => $descuento ?: null,
-                'precio_final' => Servicio::aplicarDescuento($servicio->precio, $descuento),
+                'descuento'    => ($bonoExistente || ! $descuento) ? null : $descuento,
+                'precio_final' => $precio,
             ]);
 
             foreach ($franjas as $franja) {
                 Ocupacion::create(['franja_id' => $franja->id, 'cita_id' => $cita->id]);
+            }
+
+            if ($cobrar) {
+                Pago::create([
+                    'user_id'  => $user->id,
+                    'cita_id'  => $cita->id,
+                    'bono_id'  => $servicio->tipo === 'yoga' ? $bono->id : null,
+                    'concepto' => $servicio->tipo === 'yoga'
+                        ? $servicio->titulo . ' (' . $servicio->duracion . ')'
+                        : $servicio->titulo . ' · ' . $inicio->format('d/m/Y H:i'),
+                    'importe'  => Servicio::importeEnCentimos($precio),
+                ]);
             }
 
             return $cita;
@@ -164,14 +207,55 @@ class Agenda
         });
     }
 
-    /** Cancela una cita (cliente con 24 h de antelación o admin) y libera sus horas. */
-    public function cancelar(Cita $cita): void
+    /**
+     * Cancela una cita (cliente con 24 h de antelación o admin) y libera sus horas.
+     * Si estaba pagada, se devuelve el dinero con Stripe. Las sesiones de yoga no se devuelven:
+     * la sesión vuelve al bono. Devuelve null si no había nada que devolver, true si se ha
+     * devuelto y false si Stripe no ha podido hacer la devolución.
+     */
+    public function cancelar(Cita $cita): ?bool
     {
-        DB::transaction(function () use ($cita) {
+        $pago = $cita->pago;
+        $reembolso = null;
+
+        if ($pago && $pago->estado === 'pagado' && ! $pago->bono_id) {
+            $reembolso = $this->pagos->reembolsar($pago);
+        }
+
+        DB::transaction(function () use ($cita, $pago) {
             $cita->ocupaciones()->delete();
             $cita->solicitudes()->where('estado', 'pendiente')->update(['estado' => 'rechazada']);
             $cita->update(['estado' => 'cancelada']);
+
+            // Si aún no se había pagado, se anula el pago (y el bono que se iba a comprar)
+            if ($pago && $pago->estado === 'pendiente') {
+                $pago->update(['estado' => 'cancelado']);
+                if ($pago->bono && $pago->bono->estado === 'pendiente') {
+                    $pago->bono->update(['estado' => 'cancelado']);
+                }
+            }
         });
+
+        return $reembolso;
+    }
+
+    /**
+     * Pagos abandonados: si el cliente no paga en el tiempo previsto, se anula la reserva
+     * y la hora vuelve a quedar libre. Se ejecuta al consultar la agenda.
+     */
+    public function liberarPagosCaducados(): void
+    {
+        Pago::with('cita.servicio', 'cita.pago')
+            ->where('estado', 'pendiente')
+            ->where('updated_at', '<', now()->subMinutes(Pagos::MINUTOS_PARA_PAGAR + 5))
+            ->get()
+            ->each(function (Pago $pago) {
+                if ($pago->cita && $pago->cita->estado === 'pendiente' && $pago->cita->servicio?->usaAgenda()) {
+                    $this->cancelar($pago->cita);
+                } else {
+                    $pago->update(['estado' => 'cancelado']);
+                }
+            });
     }
 
     // ──────────────────────────────────────────────────────────────

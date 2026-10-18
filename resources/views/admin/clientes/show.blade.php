@@ -25,6 +25,21 @@
         </table>
     </div>
 
+    @if($bonos->isNotEmpty())
+        <div class="caja">
+            <h3><i class="bi bi-ticket-perforated"></i> {{ __('Bonos de yoga') }}</h3>
+            <table class="tabla">
+                @foreach($bonos as $bono)
+                    <tr>
+                        <th>{{ $bono->servicio->titulo ?? __('Bono de yoga') }}</th>
+                        <td>{{ __('Quedan :restantes de :total sesiones', ['restantes' => $bono->sesionesRestantes(), 'total' => $bono->sesiones_totales]) }}</td>
+                        <td style="color:#888">{{ $bono->created_at->format('d/m/Y') }}</td>
+                    </tr>
+                @endforeach
+            </table>
+        </div>
+    @endif
+
     <div class="caja">
         <h3><i class="bi bi-calendar-check"></i> Citas ({{ $citas->count() }})</h3>
         <div class="tabla-scroll">
@@ -46,7 +61,14 @@
                             @endif
                         </td>
                         <td>{{ $cita->servicio->titulo ?? __('Sin servicio') }}</td>
-                        <td style="white-space:nowrap">{{ $cita->precio_final ?? '—' }}@if($cita->descuento) <small style="color:#888">(−{{ $cita->descuento }} %)</small>@endif</td>
+                        <td style="white-space:nowrap">
+                            {{ $cita->precio_final ?? ($cita->bono_id ? __('Bono') : '—') }}@if($cita->descuento) <small style="color:#888">(−{{ $cita->descuento }} %)</small>@endif
+                            @if($cita->pago)
+                                <div style="font-size:.78rem;color:{{ $cita->pago->estado === 'pagado' ? 'var(--primary)' : '#888' }}">
+                                    <i class="bi bi-credit-card"></i> {{ __(ucfirst($cita->pago->estado)) }}
+                                </div>
+                            @endif
+                        </td>
                         <td>{{ $cita->notas ?? '—' }}</td>
                         <td>
                             @if($cita->estado === 'cancelada')
