@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Correos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -90,6 +91,8 @@ class GoogleController extends Controller
             'password'  => Str::random(40),
         ]);
         $user->forceFill(['email_verified_at' => now()])->save();
+
+        Correos::bienvenida($user);   // solo a las cuentas nuevas
 
         return $user;
     }

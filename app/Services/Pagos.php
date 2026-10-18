@@ -137,18 +137,27 @@ class Pagos
             return false;
         }
 
-        DB::transaction(function () use ($pago, $paymentIntent) {
+        $citaConfirmada = DB::transaction(function () use ($pago, $paymentIntent) {
             $pago->update(['estado' => 'pagado', 'pagado_at' => now(), 'stripe_payment_intent' => $paymentIntent]);
+            $confirmada = false;
 
             // Masaje o primera sesión de yoga: la cita que esperaba el pago queda confirmada
             if ($pago->cita && $pago->cita->estado === 'pendiente') {
                 $pago->cita->update(['estado' => 'confirmada']);
+                $confirmada = true;
             }
             // Pack de yoga: el bono pasa a estar activo
             if ($pago->bono && $pago->bono->estado === 'pendiente') {
                 $pago->bono->update(['estado' => 'activo']);
             }
+
+            return $confirmada;
         });
+
+        // Correo con los datos de la reserva y el QR (solo cuando el pago confirma la cita)
+        if ($citaConfirmada) {
+            Correos::reservaConfirmada($pago->cita->fresh());
+        }
 
         return true;
     }

@@ -113,7 +113,7 @@ class Agenda
         $descuento = $user->nivel()['descuento'] ?? 0;
         $bonoExistente = $servicio->tipo === 'yoga' ? $user->bonoDisponible($servicio) : null;
 
-        return $this->conHorasLibres(function () use ($user, $servicio, $inicio, $telefono, $notas, $descuento, $bonoExistente) {
+        $cita = $this->conHorasLibres(function () use ($user, $servicio, $inicio, $telefono, $notas, $descuento, $bonoExistente) {
             $franjas = $this->franjasLibres($inicio, $servicio->horasNecesarias());
             $cobrar = Pagos::configurado() && ! $bonoExistente;
             $bono = $bonoExistente;
@@ -162,6 +162,12 @@ class Agenda
 
             return $cita;
         });
+
+        // Si no hay que pagar (clase con bono, o sin Stripe), la cita ya está confirmada: correo con el QR.
+        // Si hay que pagar, el correo se envía al confirmarse el pago (Pagos::marcarPagado).
+        Correos::reservaConfirmada($cita);
+
+        return $cita;
     }
 
     /** El cliente pide mover su cita. Las horas nuevas quedan apartadas hasta que el admin decida. */
@@ -196,6 +202,9 @@ class Agenda
             $cita->update(['inicio' => $solicitud->inicio, 'fin' => $solicitud->fin]);
             $solicitud->update(['estado' => 'aprobada']);
         });
+
+        // Nuevos datos de la cita (y su QR) por correo
+        Correos::reservaConfirmada($solicitud->cita->fresh(), cambio: true);
     }
 
     /** El admin rechaza el cambio: se liberan las horas apartadas y la cita sigue como estaba. */

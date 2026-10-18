@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +13,7 @@ use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['name', 'username', 'email', 'telefono', 'password', 'sexo', 'objetivo', 'frecuencia', 'perfil_completado_at', 'idioma', 'google_id'])]
 #[Hidden(['password', 'remember_token', 'google_id'])]
-class User extends Authenticatable
+class User extends Authenticatable implements HasLocalePreference
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -111,6 +112,12 @@ class User extends Authenticatable
         }
 
         return null;
+    }
+
+    /** Idioma en el que se le envían los correos (el que eligió en la web). */
+    public function preferredLocale(): ?string
+    {
+        return $this->idioma;
     }
 
     public function perfilCompleto(): bool

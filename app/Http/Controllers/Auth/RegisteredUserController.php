@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Correos;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -40,11 +41,14 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'idioma' => app()->getLocale(),   // los correos le llegarán en el idioma con el que se registró
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
+
+        Correos::bienvenida($user);
 
         // Nada más registrarse responde el cuestionario (una sola vez)
         return redirect()->route('cuestionario');

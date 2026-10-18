@@ -111,6 +111,12 @@ class VersionSeeder extends Seeder
                 'Al cancelar una cita pagada se devuelve el dinero automáticamente (las clases de yoga vuelven al bono).',
                 'Webhook de Stripe: el pago se confirma en cuanto el cliente termina de pagar, aunque cierre la pestaña.',
             ]],
+            ['0.0.21', '2026-10-18', [
+                'Correo de bienvenida al registrarse (también con Google).',
+                'Correo de reserva confirmada con todos los datos de la cita y el código QR incrustado (y adjunto).',
+                'Correo con los nuevos datos cuando se aprueba un cambio de cita.',
+                'Los correos se envían con Brevo y en el idioma de cada cliente.',
+            ]],
         ];
 
         foreach ($versiones as [$numero, $fecha, $cambios]) {
